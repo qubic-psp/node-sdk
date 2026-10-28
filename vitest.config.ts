@@ -1,8 +1,10 @@
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
     include: ['src/**/*.test.ts', 'test/**/*.test.ts'],
+    // The live check runs only through yarn test:live
+    exclude: [...configDefaults.exclude, 'test/live/**'],
     environment: 'node',
     testTimeout: 15_000,
     // The machine is shared with other psp runs: two workers are enough for this suite
