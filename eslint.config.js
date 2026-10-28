@@ -13,6 +13,8 @@ export default tseslint.config(
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrors: 'none', ignoreRestSiblings: true },
       ],
+      // () => resolve() and similar callbacks are the usual shorthand
+      '@typescript-eslint/no-confusing-void-expression': ['error', { ignoreArrowShorthand: true }],
       // The SDK never prints by itself: warnings go to the onWarning option
       'no-console': 'error',
     },
