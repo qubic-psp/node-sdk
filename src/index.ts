@@ -19,10 +19,41 @@ export type {
 } from './errors';
 export type { AccountResource } from './resources/account';
 export type { InvoicesResource } from './resources/invoices';
-export type { DeliveriesResource, WebhookSettingsResource } from './resources/webhook';
+export type {
+  DeliveriesResource,
+  WebhookSettingsResource,
+  WebhookVerifier,
+  WebhookVerifyOptions,
+} from './resources/webhook';
 export { getResponseMeta } from './transport';
 export type { RequestOptions, ResponseMeta } from './transport';
 export { EMPTY_BODY_SHA256, buildStringToSign, signRequest } from './signing';
 export type { RequestBody, SignRequestInput, SignatureHeaders, SignedRequest, StringToSignParts } from './signing';
 export type * from './types';
 export { VERSION } from './version';
+export type {
+  InvoiceEventType,
+  InvoicePaymentEventType,
+  InvoicePaymentWebhookEvent,
+  InvoiceStateEventType,
+  InvoiceStateWebhookEvent,
+  TestWebhookEvent,
+  WebhookEnvelope,
+  WebhookEvent,
+  WebhookPayment,
+} from './webhooks/events';
+export {
+  WEBHOOK_TOLERANCE_SECONDS,
+  WebhookVerificationError,
+  signWebhook,
+  verifyWebhook,
+  verifyWebhookSignature,
+} from './webhooks/verify';
+export type {
+  VerifyWebhookInput,
+  VerifyWebhookSignatureInput,
+  WebhookBody,
+  WebhookHeaders,
+  WebhookSignatureResult,
+  WebhookVerificationReason,
+} from './webhooks/verify';

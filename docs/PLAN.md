@@ -35,7 +35,7 @@ npm-пакет `@qubiq/psp-sdk` — SDK для бекенда мерчанта: 
 - [x] 3. HTTP-ядро (`src/config.ts`, `src/transport.ts`, `src/errors.ts`): опции и env `PSP_API_KEY`/`PSP_API_SECRET`/`PSP_API_URL`, проверка формата ключа и секрета и их сети, https кроме localhost; URL и тело собираются один раз, каждая попытка подписывается заново; `redirect: 'manual'`, таймаут 180 с; ошибки `PspApiError` (+ `is()` и `isPspApiError` с типами `details`), `PspAuthError` (обе строки подписи, расхождение часов, подсказка), `PspConnectionError` (`not_sent`/`unknown`), `PspTimeoutError`, `PspUnexpectedResponseError`; предупреждение `X-Api-Key-Deprecated`; хуки `onResponse`, `onRetry`, `onWarning`; `getResponseMeta()`. Тесты — локальный сервер `test/fake-gateway.ts` со своей проверкой подписи и nonce
 - [x] 4. Повторы по 13.10 (`src/transport.ts`, `#retryDelay`), сделаны одним коммитом со стадией 3: `safe` — сбой связи, таймаут, `503 service_unavailable`/`address_pool_unavailable`/`net_unavailable`, `502`–`504` без тела API, `500` один раз, `429` и `503 maintenance` — по `Retry-After` не дольше `maxRetryAfterSeconds` (30 с), `401 timestamp_out_of_window` — один раз; `once` (redeliver) — один повтор; `never` (тест вебхука) — только если вызов точно не выполнился (`not_sent`, `503 service_unavailable` без `outcome`, `net_unavailable`); пауза 1/2/4/8 с ±20 %, `maxRetries` 4
 - [x] 5. Ресурсы и клиент: `new PspClient(options)` (`src/client.ts`) — `psp.account.get()`; `psp.invoices` — `create`, `list`, `listAll`, `get`, `listEvents`, `listAllEvents`, `cancel`; `psp.webhook` — `get`, `setUrl`, `removeUrl`, `sendTest` и `psp.webhook.deliveries` — `list`, `listAll`, `get`, `redeliver`; `listAll*` — async-итератор по страницам (`src/pagination.ts`, 100 на страницу, повтор id на следующей странице пропускается); `psp.net`/`isLive` по ключу, секрет не виден в `JSON.stringify` и `inspect`. Публичный вход — `src/index.ts`. Тесты `src/client.test.ts`
-- [ ] 6. Вебхуки: проверка подписи, типы событий, сверка `chain` + тесты на таблицу 13.6
+- [x] 6. Вебхуки (`src/webhooks/`): `verifyWebhookSignature` (шаги 1–6 13.6: окно ±300 с, формат `v1=`, HMAC, сравнение за постоянное время, `secret` + `previousSecret`), `verifyWebhook` (ещё JSON, `id`/`type` = заголовки, `version` 1, `expectedMerchantId`, сеть ключа ↔ `chain`), `psp.webhook.verify()` с секретом и сетью клиента и `previousApiSecret` (env `PSP_API_PREVIOUS_SECRET`), `signWebhook` для тестов мерчанта; `WebhookVerificationError` с `reason` и `status` для ответа (401/400); типы событий — объединение по `type` (8 с платежом, 3 без, `webhook.test`), `WebhookPayment` отдельно от платежа API (нет `creditStatus`, есть `aml.flags`), `aml: null` → `{ status: null }`. Тесты: таблица 13.7 (9 строк), обе попытки `invoice.paid`, прежний секрет, `Headers` и любой регистр, поля `data.invoice`/`data.payment` против схем API; тела векторов — байт в байт в `test/vectors/`
 - [ ] 7. Пакет: ESM + CJS, publint, attw, смоук установленного tarball на Node 20/22/24, тесты типов
 - [ ] 8. README (английский), CHANGELOG, `examples/`
 - [ ] 9. CI: `ci.yml`, `release.yml`
@@ -51,6 +51,7 @@ npm-пакет `@qubiq/psp-sdk` — SDK для бекенда мерчанта: 
 | 1      | `81807e2` |
 | 2      | `443713a` |
 | 3–4    | `373fd7f` |
+| 5      | `0db728c` |
 
 ## Найденные расхождения со спекой
 

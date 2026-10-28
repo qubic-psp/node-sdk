@@ -17,8 +17,10 @@ import type {
   ListInvoicesParams,
   Page,
   SendTestWebhookParams,
+  WebhookEventType,
   WebhookSettings,
 } from './types';
+import type { InvoiceEventType } from './webhooks/events';
 
 type Schemas = components['schemas'];
 
@@ -74,6 +76,13 @@ describe('responses', () => {
     expectTypeOf<Same<Page<Delivery>, Json<'listDeliveries', 200>>>().toEqualTypeOf<true>();
     expectTypeOf<Same<DeliveryWithAttempts, Json<'sendTestWebhook', 201>>>().toEqualTypeOf<true>();
     expectTypeOf<Same<Delivery, Json<'redeliverDelivery', 200>>>().toEqualTypeOf<true>();
+  });
+});
+
+describe('webhook types', () => {
+  it('the 11 invoice events and webhook.test are the delivery types of the spec', () => {
+    expectTypeOf<InvoiceEventType | 'webhook.test'>().toEqualTypeOf<WebhookEventType>();
+    expectTypeOf<WebhookEventType>().toEqualTypeOf<Schemas['V1Delivery']['type']>();
   });
 });
 

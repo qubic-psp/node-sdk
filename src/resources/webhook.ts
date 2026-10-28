@@ -8,6 +8,8 @@ import type {
   SendTestWebhookParams,
   WebhookSettings,
 } from '../types';
+import type { WebhookEvent } from '../webhooks/events';
+import type { WebhookBody, WebhookHeaders } from '../webhooks/verify';
 
 /** `psp.webhook.deliveries` — the log of webhook deliveries to your endpoint. */
 export class DeliveriesResource {
@@ -42,17 +44,46 @@ export class DeliveriesResource {
   }
 }
 
+/** Options of `psp.webhook.verify()`. */
+export interface WebhookVerifyOptions {
+  /** Your merchant id (`psp.account.get()`): a body of another merchant is refused. */
+  expectedMerchantId?: string;
+  /** Window of `X-Webhook-Timestamp`, seconds. Default 300. */
+  toleranceSeconds?: number;
+  /** Current time (Unix seconds or a `Date`) — for tests. */
+  now?: number | Date;
+}
+
+/** Verifies a webhook with the secret and the network of the client. */
+export type WebhookVerifier = (
+  body: WebhookBody,
+  headers: WebhookHeaders,
+  options: WebhookVerifyOptions,
+) => WebhookEvent;
+
 /**
- * `psp.webhook` — the callback URL, the test webhook and the delivery log. Incoming webhooks are checked with
- * `psp.webhook.verify()`.
+ * `psp.webhook` — the callback URL, the test webhook, the delivery log and `verify()` for incoming webhooks.
  */
 export class WebhookSettingsResource {
   readonly #transport: Transport;
+  readonly #verify: WebhookVerifier;
   readonly deliveries: DeliveriesResource;
 
-  constructor(transport: Transport) {
+  constructor(transport: Transport, verify: WebhookVerifier) {
     this.#transport = transport;
+    this.#verify = verify;
     this.deliveries = new DeliveriesResource(transport);
+  }
+
+  /**
+   * Verifies an incoming webhook with the API secret of this client (and `previousApiSecret` during a rotation) and
+   * returns its typed body. Pass the raw body bytes, before any JSON parsing, and the request headers.
+   * Also checks that `chain` belongs to the network of the key: a live key accepts only `mainnet` webhooks.
+   *
+   * Throws {@link WebhookVerificationError}: answer with its `status` (401/400) and do not process the body.
+   */
+  verify(body: WebhookBody, headers: WebhookHeaders, options: WebhookVerifyOptions = {}): WebhookEvent {
+    return this.#verify(body, headers, options);
   }
 
   /** `GET /api/v1/webhook`: the URL, the secret state and the delivery state. */

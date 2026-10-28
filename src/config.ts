@@ -44,6 +44,12 @@ export interface PspClientOptions {
   apiKey?: string;
   /** API secret `psp_sk_…` of the same key. Default: `process.env.PSP_API_SECRET`. Never sent over the network. */
   apiSecret?: string;
+  /**
+   * The previous API secret during a secret rotation, for `psp.webhook.verify()` only: webhook attempts that started
+   * before the change are still signed with it. Requests to the API are always signed with `apiSecret`.
+   * Default: `process.env.PSP_API_PREVIOUS_SECRET`.
+   */
+  previousApiSecret?: string;
   /** Base URL of the API, e.g. `https://api.psp.example`. Default: `process.env.PSP_API_URL`. */
   baseUrl?: string;
   /**
@@ -86,6 +92,7 @@ export function netOfCredential(credential: string): PspNet {
 export interface ResolvedConfig {
   apiKey: string;
   apiSecret: string;
+  previousApiSecret: string | undefined;
   baseUrl: string;
   net: PspNet;
   timeoutMs: number;
@@ -147,6 +154,20 @@ export function resolveConfig(options: PspClientOptions, sdkUserAgent: string): 
   if (netOfCredential(apiSecret) !== net) {
     throw new TypeError(`apiKey is a ${net} key, apiSecret belongs to the other network`);
   }
+  const rawPrevious = options.previousApiSecret ?? env('PSP_API_PREVIOUS_SECRET');
+  const previousApiSecret =
+    rawPrevious === undefined
+      ? undefined
+      : credential(
+          rawPrevious,
+          'previousApiSecret',
+          'PSP_API_PREVIOUS_SECRET',
+          SECRET_RE,
+          'psp_sk_test_ + 36 letters and digits',
+        );
+  if (previousApiSecret !== undefined && netOfCredential(previousApiSecret) !== net) {
+    throw new TypeError(`previousApiSecret belongs to another network than the ${net} apiKey`);
+  }
 
   const rawBaseUrl = options.baseUrl ?? env('PSP_API_URL');
   if (rawBaseUrl === undefined) {
@@ -175,6 +196,7 @@ export function resolveConfig(options: PspClientOptions, sdkUserAgent: string): 
   return {
     apiKey,
     apiSecret,
+    previousApiSecret,
     baseUrl: url.href,
     net,
     timeoutMs,

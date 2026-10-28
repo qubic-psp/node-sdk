@@ -4,6 +4,7 @@ import { InvoicesResource } from './resources/invoices';
 import { WebhookSettingsResource } from './resources/webhook';
 import { Transport } from './transport';
 import { VERSION } from './version';
+import { verifyWebhook } from './webhooks/verify';
 
 function sdkUserAgent(): string {
   const node = typeof process === 'undefined' ? 'unknown' : process.version;
@@ -23,7 +24,7 @@ export class PspClient {
   readonly account: AccountResource;
   /** Invoices: create, read, history, cancel. */
   readonly invoices: InvoicesResource;
-  /** Webhook URL, test webhook, delivery log. */
+  /** Webhook URL, test webhook, delivery log, verification of incoming webhooks. */
   readonly webhook: WebhookSettingsResource;
   /** Network of the key: `mainnet` for `psp_pk_live_…`, otherwise `testnet`. */
   readonly net: PspNet;
@@ -39,7 +40,16 @@ export class PspClient {
     this.#apiKey = config.apiKey;
     this.account = new AccountResource(transport);
     this.invoices = new InvoicesResource(transport);
-    this.webhook = new WebhookSettingsResource(transport);
+    this.webhook = new WebhookSettingsResource(transport, (body, headers, verifyOptions) =>
+      verifyWebhook({
+        ...verifyOptions,
+        body,
+        headers,
+        secret: config.apiSecret,
+        previousSecret: config.previousApiSecret,
+        net: config.net,
+      }),
+    );
   }
 
   /** `true` for a mainnet key: real money. */
