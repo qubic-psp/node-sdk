@@ -1,0 +1,41 @@
+# Checks of the SDK on GitHub-hosted runners (the self-hosted runner of the dev server is not used).
+name: ci
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: lint, types, tests, package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - run: yarn ci
+
+  node:
+    name: Node.js ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [18, 20, 22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+      # Some dev tools (fastify, NestJS for the examples) declare newer engines; the SDK itself needs Node.js 18+
+      - run: yarn install --frozen-lockfile --ignore-engines
+      - run: yarn test
+      - run: yarn smoke

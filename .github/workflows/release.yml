@@ -1,0 +1,31 @@
+# Publishes the package to npmjs.com when a tag v<version> is pushed. Needs the repository secret NPM_TOKEN
+# (an npm automation token with publish rights to @qubiq). Provenance is added for a public repository only:
+# npm refuses it for private ones.
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+          registry-url: https://registry.npmjs.org
+      - run: yarn install --frozen-lockfile
+      - name: The tag equals the version of package.json
+        run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
+      - run: yarn ci
+      - name: Publish
+        run: npm publish --access public ${{ github.event.repository.private == false && '--provenance' || '' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
