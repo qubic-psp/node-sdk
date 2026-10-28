@@ -1,4 +1,4 @@
-// Live check against a real platform (testnet). Runs only with credentials of a test merchant:
+// Live check against a real platform (testnet). Runs only with credentials of a test merchant (env or .env.live):
 //   PSP_E2E_API_URL=https://… PSP_E2E_API_KEY=psp_pk_test_… PSP_E2E_API_SECRET=psp_sk_test_… yarn test:live
 // Optional: PSP_E2E_NETWORK (tron), PSP_E2E_ASSET (USDT), PSP_E2E_AMOUNT (10). The invoice it creates is cancelled.
 // The test webhook is verified with the SDK over the body and the headers the platform recorded for the attempt.
