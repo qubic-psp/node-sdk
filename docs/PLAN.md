@@ -34,7 +34,7 @@ npm-пакет `@qubiq/psp-sdk` — SDK для бекенда мерчанта: 
 - [x] 2. Синхронизация спеки: `yarn api:sync` (копия `api/openapi.v1.json` и `src/generated/schema.d.ts`), `yarn api:check` — только локально, нужен соседний gateway; публичные типы `src/types.ts` вручную с JSDoc, их совпадение со схемами — `src/types.test-d.ts` (ответы, тела, ключи query); `src/routes.ts` — 13 операций с правилом повтора, тест покрытия `src/routes.test.ts` (13 в SDK + 14 исключённых = 27, `x-idempotency` нигде нет)
 - [x] 3. HTTP-ядро (`src/config.ts`, `src/transport.ts`, `src/errors.ts`): опции и env `PSP_API_KEY`/`PSP_API_SECRET`/`PSP_API_URL`, проверка формата ключа и секрета и их сети, https кроме localhost; URL и тело собираются один раз, каждая попытка подписывается заново; `redirect: 'manual'`, таймаут 180 с; ошибки `PspApiError` (+ `is()` и `isPspApiError` с типами `details`), `PspAuthError` (обе строки подписи, расхождение часов, подсказка), `PspConnectionError` (`not_sent`/`unknown`), `PspTimeoutError`, `PspUnexpectedResponseError`; предупреждение `X-Api-Key-Deprecated`; хуки `onResponse`, `onRetry`, `onWarning`; `getResponseMeta()`. Тесты — локальный сервер `test/fake-gateway.ts` со своей проверкой подписи и nonce
 - [x] 4. Повторы по 13.10 (`src/transport.ts`, `#retryDelay`), сделаны одним коммитом со стадией 3: `safe` — сбой связи, таймаут, `503 service_unavailable`/`address_pool_unavailable`/`net_unavailable`, `502`–`504` без тела API, `500` один раз, `429` и `503 maintenance` — по `Retry-After` не дольше `maxRetryAfterSeconds` (30 с), `401 timestamp_out_of_window` — один раз; `once` (redeliver) — один повтор; `never` (тест вебхука) — только если вызов точно не выполнился (`not_sent`, `503 service_unavailable` без `outcome`, `net_unavailable`); пауза 1/2/4/8 с ±20 %, `maxRetries` 4
-- [ ] 5. Ресурсы account, invoices, webhook и deliveries, пагинация `listAll` + тесты
+- [x] 5. Ресурсы и клиент: `new PspClient(options)` (`src/client.ts`) — `psp.account.get()`; `psp.invoices` — `create`, `list`, `listAll`, `get`, `listEvents`, `listAllEvents`, `cancel`; `psp.webhook` — `get`, `setUrl`, `removeUrl`, `sendTest` и `psp.webhook.deliveries` — `list`, `listAll`, `get`, `redeliver`; `listAll*` — async-итератор по страницам (`src/pagination.ts`, 100 на страницу, повтор id на следующей странице пропускается); `psp.net`/`isLive` по ключу, секрет не виден в `JSON.stringify` и `inspect`. Публичный вход — `src/index.ts`. Тесты `src/client.test.ts`
 - [ ] 6. Вебхуки: проверка подписи, типы событий, сверка `chain` + тесты на таблицу 13.6
 - [ ] 7. Пакет: ESM + CJS, publint, attw, смоук установленного tarball на Node 20/22/24, тесты типов
 - [ ] 8. README (английский), CHANGELOG, `examples/`
@@ -50,6 +50,7 @@ npm-пакет `@qubiq/psp-sdk` — SDK для бекенда мерчанта: 
 | 0      | `d9ba072` |
 | 1      | `81807e2` |
 | 2      | `443713a` |
+| 3–4    | `373fd7f` |
 
 ## Найденные расхождения со спекой
 
