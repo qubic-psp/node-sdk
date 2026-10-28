@@ -19,4 +19,5 @@ First version.
   - typed `WebhookEvent`;
   - `signWebhook()` for tests.
 - `getResponseMeta()`, the `onResponse` / `onRetry` / `onWarning` hooks, and a warning for requests signed with the previous key.
+- Payment widget links: `psp.checkout.createUrl(invoice, { branding, locale })` and `createCheckoutToken()` — a token signed offline with the API secret for the platform payment page in an iframe (`@qubiq/psp-react`).
 - ESM and CommonJS builds with type declarations, Node.js 18+, no runtime dependencies.

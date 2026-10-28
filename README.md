@@ -18,6 +18,7 @@ Node.js SDK for the PSP merchant API. Use it on your backend to accept crypto pa
 - [Configuration](#configuration)
 - [Frameworks](#frameworks): [NestJS](#nestjs), [Express](#express), [Fastify](#fastify), [Next.js](#nextjs), [plain Node.js](#plain-nodejs)
 - [Invoices](#invoices)
+- [Payment widget](#payment-widget)
 - [Webhooks](#webhooks)
 - [Webhook settings and the delivery log](#webhook-settings-and-the-delivery-log)
 - [Errors](#errors)
@@ -95,6 +96,7 @@ const psp = new PspClient({
 | `apiSecret`            | `PSP_API_SECRET`          | API secret of the same key and network. It is never sent: it only keys the HMAC.                                                                              |
 | `previousApiSecret`    | `PSP_API_PREVIOUS_SECRET` | Previous secret during a [rotation](#rotating-the-api-secret). Used only by `psp.webhook.verify()`.                                                           |
 | `baseUrl`              | `PSP_API_URL`             | API URL. It must be `https://`; plain `http://` is allowed only for `localhost` / `127.0.0.1` / `[::1]`, or anywhere with `allowInsecureHttp`.                |
+| `checkoutUrl`          | `PSP_CHECKOUT_URL`        | URL of the payment page for [payment widget](#payment-widget) links, e.g. `https://pay.psp.example`. `https://`, or `http://` on localhost.                   |
 | `timeoutMs`            | `180000`                  | Timeout of one attempt. The platform answers any request within 175 s. A shorter timeout can turn a slow success into an [unknown outcome](#unknown-outcome). |
 | `maxRetries`           | `4`                       | Retries after the first attempt. `0` turns retries off.                                                                                                       |
 | `retryBaseDelayMs`     | `1000`                    | First pause between attempts. It doubles with each retry: 1, 2, 4, 8 s, ±20 % jitter.                                                                         |
@@ -278,7 +280,7 @@ createServer((req, res) => {
 
 ## Invoices
 
-An invoice asks the buyer to pay `amount` of `asset` in `network` to `address` before `expiresAt`. The platform has no hosted payment page: show the address, the amount, the asset, the network and the deadline on your own site.
+An invoice asks the buyer to pay `amount` of `asset` in `network` to `address` before `expiresAt`. Show the address, the amount, the asset, the network and the deadline on your own site, or embed the platform's [payment widget](#payment-widget).
 
 ### Create
 
@@ -360,6 +362,60 @@ Only an invoice without payments can be cancelled. Otherwise the call fails with
 | `expired`         | The window closed without payments                                   | yes   |
 | `expired_partial` | The window closed with an underpayment (`underpaid`)                 | yes   |
 | `cancelled`       | Cancelled by you or an admin (`statusReason`)                        | yes   |
+
+## Payment widget
+
+Instead of building your own payment screen, you can show the platform's payment page in an `<iframe>` on your site. The page shows the buyer:
+
+- your logo, company name and accent colour;
+- the amount, the network, a QR code and the address with a copy button;
+- network warnings, a countdown, and the live payment status.
+
+Your server builds the link, and your frontend embeds it:
+
+```ts
+// server: build the link each time you render the order page — no network call
+const { url, expiresAt } = psp.checkout.createUrl(invoice, {
+  branding: {
+    companyName: 'My Shop',
+    logoUrl: 'https://shop.example/logo.png', // https only, shown as an image
+    accentColor: '#4f46e5',
+    theme: 'auto', // light | dark | auto
+    title: 'Order #10530',
+  },
+  locale: 'en', // ru | en; default — the buyer's browser
+  expiresInSeconds: 86_400, // default 24 h, at most 7 days
+});
+// url = https://pay.psp.example/#v1.eyJr…  → send it to your frontend
+```
+
+```tsx
+// frontend: npm install @qubiq/psp-react
+import { PspCheckout } from '@qubiq/psp-react';
+
+<PspCheckout url={url} onPaid={() => showThankYou()} onExpired={() => offerNewInvoice()} />;
+// or without React: <iframe src={url} allow="clipboard-write" style="width:100%;border:0"></iframe>
+```
+
+How it works:
+
+- **The token.** The link carries a token after `#`. It holds the key id, the invoice id, the expiry, your branding and the locale, and it is signed with your API secret (HMAC-SHA256, its own `psp-checkout-v1.` prefix). The secret is not in the link.
+- **No tampering.** Nobody can change the invoice or the branding without breaking the signature. A browser never sends the part after `#` to a server.
+- **Data the page shows.** The page shows only what the buyer needs: no `externalId`, `description`, `metadata` or `merchantId`. After the payment window closes, the page hides the address.
+- **Lifetime.** Links of the previous key keep working while that key works, 60 minutes after a secret rotation. Revoking the key stops all its links at once. A new link costs nothing, so build one per page view.
+- **Shipping.** Ship orders on the `invoice.paid` / `invoice.overpaid` webhook, never on `onPaid` alone: browser events can be faked.
+
+`createCheckoutToken({ apiKey, apiSecret, invoiceId, branding, locale, expiresAt })` builds the bare token, if you assemble the URL yourself. Branding rules:
+
+| Field         | Rule                                                                                                 |
+| ------------- | ---------------------------------------------------------------------------------------------------- |
+| `companyName` | 1–64 characters (JavaScript string length), no control characters, no leading or trailing whitespace |
+| `title`       | Same rules, up to 100 characters                                                                     |
+| `logoUrl`     | `https:` URL up to 1024 characters, no credentials or fragment                                       |
+| `accentColor` | `#rrggbb`                                                                                            |
+| `theme`       | `light`, `dark` or `auto`                                                                            |
+
+The constructor and `createUrl()` throw a `TypeError` on anything else.
 
 ## Webhooks
 

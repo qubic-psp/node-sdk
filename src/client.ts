@@ -1,3 +1,4 @@
+import { CheckoutResource } from './checkout';
 import { resolveConfig, type PspClientOptions, type PspNet } from './config';
 import { AccountResource } from './resources/account';
 import { InvoicesResource } from './resources/invoices';
@@ -26,6 +27,8 @@ export class PspClient {
   readonly invoices: InvoicesResource;
   /** Webhook URL, test webhook, delivery log, verification of incoming webhooks. */
   readonly webhook: WebhookSettingsResource;
+  /** Links to the payment widget (an iframe page), built locally with the API secret. */
+  readonly checkout: CheckoutResource;
   /** Network of the key: `mainnet` for `psp_pk_live_…`, otherwise `testnet`. */
   readonly net: PspNet;
   /** Base URL of the API, normalized. */
@@ -39,6 +42,7 @@ export class PspClient {
     this.baseUrl = config.baseUrl;
     this.#apiKey = config.apiKey;
     this.account = new AccountResource(transport);
+    this.checkout = new CheckoutResource(config.apiKey, config.apiSecret, config.checkoutUrl);
     this.invoices = new InvoicesResource(transport);
     let warnedPreviousSecret = false;
     this.webhook = new WebhookSettingsResource(transport, (body, headers, verifyOptions) =>

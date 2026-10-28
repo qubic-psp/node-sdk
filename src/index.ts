@@ -1,4 +1,14 @@
 // Public entry of @qubiq/psp-sdk.
+export { CHECKOUT_DEFAULT_TTL_SECONDS, CHECKOUT_MAX_TTL_SECONDS, createCheckoutToken } from './checkout';
+export type {
+  CheckoutBranding,
+  CheckoutLink,
+  CheckoutLocale,
+  CheckoutResource,
+  CheckoutToken,
+  CheckoutUrlOptions,
+  CreateCheckoutTokenInput,
+} from './checkout';
 export { PspClient } from './client';
 export type { PspClientOptions, PspNet, PspResponseInfo, PspRetryInfo, PspWarning } from './config';
 export {

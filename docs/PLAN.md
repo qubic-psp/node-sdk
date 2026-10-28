@@ -43,6 +43,10 @@ npm-пакет `@qubiq/psp-sdk` — SDK для бекенда мерчанта: 
 - [ ] 11. Первая публикация 0.1.0 (шаги владельца по одному)
 - [~] 12. Документация вокруг: страница `/docs/sdk` (ru + en) в merchant-ui — `b6f1d2d` в `dev`, не запушено (push = выкладка сайта; страница должна выйти вместе с публикацией пакета); DOCS — строки репозитория в README §1 и §10 и CLAUDE.md, `9c0391d` в `main`, не запушено (ссылки на `qubic-psp/node-sdk` заработают, когда репозиторий появится); отчёт security-auditor `DOCS/security/node-sdk.md` (2026-10-28: high 1, medium 1, low 6, info 3) — исправлено в коде SDK: SDK-001 (секреты вебхука проверяются, пустой `previousSecret` = нет, иначе `TypeError`), SDK-002 (релиз: сборка без секретов → публикация в окружении `npm` с `--ignore-scripts`, тег только на `main`, actions по SHA), SDK-003 (id `.`/`..` отклоняются), SDK-004 (предупреждение `webhook_previous_secret`, в README — не ставить прежний секрет после утечки), SDK-005 (`toleranceSeconds`, `now`, `maxRetries`, `timeoutMs` проверяются, пауза ≤ 60 с, таймеры ≤ 2³¹−1 мс), SDK-006 (сеть для `chain` — из префикса секрета, прежний секрет — той же сети; опция `net` убрана), SDK-011 (ошибка `baseUrl` без значения); SDK-007 — шаг владельца (занять `@qubiq` на npm); SDK-008 — уязвимости только в dev-зависимостях (vitest 3 / tinypool), не в пакете; SDK-009, SDK-010 — к сведению
 
+### Виджет оплаты (решение владельца 2026-10-28, план `lively-riding-badger`)
+
+- [x] `psp.checkout.createUrl(invoice, { branding, locale, expiresInSeconds })` и `createCheckoutToken()` (`src/checkout.ts`) по gateway [20.2–20.4](../../gateway/docs/20-pay.md): токен `v1.<payload>.<signature>` подписан секретом API без запроса в сеть, оформление проверяется по 20.3 (длина — строка JavaScript, UTF-16, как в gateway), срок по умолчанию 24 ч, не больше 7 суток; опция `checkoutUrl` / env `PSP_CHECKOUT_URL`; тесты на оба вектора 20.4 и отрицательные случаи (`src/checkout.test.ts`); README «Payment widget», CHANGELOG. Не опубликовано
+
 ## Коммиты стадий
 
 | Стадия          | Коммит               |

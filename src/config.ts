@@ -57,6 +57,12 @@ export interface PspClientOptions {
   /** Base URL of the API, e.g. `https://api.psp.example`. Default: `process.env.PSP_API_URL`. */
   baseUrl?: string;
   /**
+   * URL of the payment page for `psp.checkout.createUrl()`, e.g. `https://pay.psp.example`.
+   * Default: `process.env.PSP_CHECKOUT_URL`. Needed only for payment widget links.
+   */
+  checkoutUrl?: string;
+
+  /**
    * Timeout of one attempt, ms. Default 180 000: the platform answers any request sooner, a shorter timeout turns
    * a slow success into an unknown outcome (gateway 13.10).
    */
@@ -102,6 +108,7 @@ export interface ResolvedConfig {
   apiSecret: string;
   previousApiSecret: string | undefined;
   baseUrl: string;
+  checkoutUrl: string | undefined;
   net: PspNet;
   timeoutMs: number;
   maxRetries: number;
@@ -196,6 +203,23 @@ export function resolveConfig(options: PspClientOptions, sdkUserAgent: string): 
     throw new TypeError('baseUrl must not contain a query, a fragment or credentials');
   }
 
+  const rawCheckoutUrl = options.checkoutUrl ?? env('PSP_CHECKOUT_URL');
+  let checkoutUrl: string | undefined;
+  if (rawCheckoutUrl !== undefined) {
+    let page: URL;
+    try {
+      page = new URL(rawCheckoutUrl);
+    } catch {
+      throw new TypeError('checkoutUrl is not a valid URL');
+    }
+    const local = page.protocol === 'http:' && LOCAL_HOSTS.has(page.hostname);
+    if (page.protocol !== 'https:' && !local) throw new TypeError('checkoutUrl must be https://');
+    if (page.search || page.hash || page.username || page.password) {
+      throw new TypeError('checkoutUrl must not contain a query, a fragment or credentials');
+    }
+    checkoutUrl = page.href;
+  }
+
   const fetchImpl = options.fetch ?? (typeof fetch === 'function' ? fetch : undefined);
   if (!fetchImpl) throw new TypeError('No global fetch: use Node.js 18+ or pass the fetch option');
 
@@ -207,6 +231,7 @@ export function resolveConfig(options: PspClientOptions, sdkUserAgent: string): 
     apiSecret,
     previousApiSecret,
     baseUrl: url.href,
+    checkoutUrl,
     net,
     timeoutMs,
     maxRetries: nonNegative(options.maxRetries, 4, 'maxRetries', true),
