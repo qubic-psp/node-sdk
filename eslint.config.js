@@ -19,9 +19,16 @@ export default tseslint.config(
       'no-console': 'error',
     },
   },
-  { files: ['**/*.js', '**/*.mjs'], extends: [tseslint.configs.disableTypeChecked] },
+  { files: ['**/*.js', '**/*.mjs', '**/*.cjs'], extends: [tseslint.configs.disableTypeChecked] },
+  // The CommonJS smoke consumer checks require() of the package on purpose
+  { files: ['**/*.cjs'], rules: { '@typescript-eslint/no-require-imports': 'off' } },
   {
     files: ['**/*.test.ts', '**/*.test-d.ts', 'test/**', 'scripts/**', 'examples/**'],
     rules: { '@typescript-eslint/no-non-null-assertion': 'off', 'no-console': 'off' },
+  },
+  {
+    // expectTypeOf(psp.invoices.create) looks at a method without calling it
+    files: ['**/*.test-d.ts'],
+    rules: { '@typescript-eslint/unbound-method': 'off' },
   },
 );

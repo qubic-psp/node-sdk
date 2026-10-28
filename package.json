@@ -56,7 +56,8 @@
     "api:check": "node scripts/api-sync.mjs --check",
     "package:check": "publint --strict --pack npm && attw --pack .",
     "prepack": "yarn build",
-    "ci": "yarn lockfile:lint && yarn typecheck && yarn lint && yarn format:check && yarn test && yarn build && yarn package:check"
+    "ci": "yarn lockfile:lint && yarn typecheck && yarn lint && yarn format:check && yarn test && yarn build && yarn package:check && yarn smoke",
+    "smoke": "node scripts/smoke.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
