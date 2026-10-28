@@ -37,7 +37,18 @@ describe.skipIf(!enabled)('live testnet', () => {
       description: 'SDK live test',
       metadata: { source: 'node-sdk' },
     };
-    const created = await psp.invoices.create(params, { clientRequestId: `${externalId}-1` });
+    // The tariff decides the allowed amounts: on amount_out_of_range take the minimum from the typed details
+    let created;
+    try {
+      created = await psp.invoices.create(params, { clientRequestId: `${externalId}-1` });
+    } catch (err) {
+      if (!isPspApiError(err, 'amount_out_of_range')) throw err;
+      console.log(
+        `amount ${params.amount} is out of ${err.details.min} … ${err.details.max ?? '∞'}: using the minimum`,
+      );
+      params.amount = err.details.min;
+      created = await psp.invoices.create(params, { clientRequestId: `${externalId}-1` });
+    }
     expect(getResponseMeta(created)?.status).toBe(201);
     invoiceId = created.id;
     console.log(`invoice ${created.id}: ${created.amount} ${created.asset} to ${created.address}`);
@@ -46,7 +57,7 @@ describe.skipIf(!enabled)('live testnet', () => {
     expect(getResponseMeta(again)?.status).toBe(200);
     expect(again.id).toBe(created.id);
 
-    await expect(psp.invoices.create({ ...params, amount: '11' })).rejects.toSatisfy(
+    await expect(psp.invoices.create({ ...params, description: 'another description' })).rejects.toSatisfy(
       (err) => isPspApiError(err, 'invoice_conflict') && err.details.invoiceId === created.id,
     );
 
