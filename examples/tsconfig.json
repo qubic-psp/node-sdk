@@ -1,0 +1,10 @@
+{
+  // The examples compile against the sources of the SDK: `yarn typecheck` checks them too.
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "paths": { "@qubiq/psp-sdk": ["../src/index.ts"] }
+  },
+  "include": ["."]
+}

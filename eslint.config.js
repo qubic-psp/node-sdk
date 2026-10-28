@@ -27,6 +27,11 @@ export default tseslint.config(
     rules: { '@typescript-eslint/no-non-null-assertion': 'off', 'no-console': 'off' },
   },
   {
+    // NestJS modules are empty classes with a decorator
+    files: ['examples/**'],
+    rules: { '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }] },
+  },
+  {
     // expectTypeOf(psp.invoices.create) looks at a method without calling it
     files: ['**/*.test-d.ts'],
     rules: { '@typescript-eslint/unbound-method': 'off' },
