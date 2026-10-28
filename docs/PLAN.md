@@ -71,7 +71,7 @@ npm-пакет `@qubiq/psp-sdk` — SDK для бекенда мерчанта: 
 Код, тесты, README, примеры и CI готовы (стадии 0–9). Осталось — шаги владельца, по одному:
 
 1. ~~Репозиторий `qubic-psp/node-sdk`~~ — создан (публичный), origin `git@qubic-psp:qubic-psp/node-sdk.git`, CI зелёный.
-2. Ключ и секрет test-мерчанта (Testnet) и URL API → `PSP_E2E_API_URL`/`PSP_E2E_API_KEY`/`PSP_E2E_API_SECRET yarn test:live` (стадия 10); для проверки тестового вебхука у мерчанта должен быть задан URL вебхука.
+2. Ключ и секрет test-мерчанта (Testnet) и URL API — в файл `.env.live` (в `.gitignore`, образец `.env.live.example`), затем `yarn test:live` (стадия 10); для проверки тестового вебхука у мерчанта должен быть задан URL вебхука.
 3. Занять организацию `qubiq` на npmjs.com (SDK-007), токен публикации (granular, только `@qubiq/psp-sdk`) → секрет `NPM_TOKEN` окружения `npm` в GitHub (правила: обязательный ревьюер, только теги `v*`).
 4. `main` = `dev`, тег `v0.1.0` на `main` → `release.yml` публикует; после первой публикации — trusted publishing (OIDC) вместо токена.
 5. После публикации: push `dev` merchant-ui (страница `/docs/sdk`, коммиты `b6f1d2d`, `819c17f`). DOCS (`9c0391d`, `8fcbf0f`) запушен 2026-10-28.
