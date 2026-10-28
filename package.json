@@ -57,7 +57,8 @@
     "package:check": "publint --strict --pack npm && attw --pack .",
     "prepack": "yarn build",
     "ci": "yarn lockfile:lint && yarn typecheck && yarn lint && yarn format:check && yarn test && yarn build && yarn package:check && yarn smoke",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "test:live": "vitest run --config vitest.live.config.ts"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",

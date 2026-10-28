@@ -387,8 +387,11 @@ export interface Delivery {
   updatedAt: IsoDateTime;
 }
 
-/** Headers of a delivery attempt as they were sent to your endpoint (lower-case names). */
-export interface DeliveryRequestHeaders {
+/**
+ * Headers of a delivery attempt as they were sent to your endpoint (lower-case names). A type literal, so it can be
+ * passed to `verifyWebhook({ headers })` as is.
+ */
+export type DeliveryRequestHeaders = {
   'content-type': string;
   'user-agent': string;
   'x-webhook-id': string;
@@ -396,7 +399,7 @@ export interface DeliveryRequestHeaders {
   'x-webhook-timestamp': string;
   'x-webhook-signature': string;
   'x-webhook-attempt': string;
-}
+};
 
 /** One HTTP attempt of a delivery. */
 export interface DeliveryAttempt {

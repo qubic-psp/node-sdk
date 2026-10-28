@@ -39,9 +39,9 @@ npm-пакет `@qubiq/psp-sdk` — SDK для бекенда мерчанта: 
 - [x] 7. Пакет: tsup → `dist/index.js` (ESM) + `dist/index.cjs` + `.d.ts`/`.d.cts` (≈ 104 кБ в tarball, 10 файлов, в типах нет схем OpenAPI и русских описаний); `publint --strict` и `attw --pack` чистые (node10, node16 CJS/ESM, bundler); `yarn smoke` (`scripts/smoke.mjs`) — `npm pack`, установка tarball во временный проект, `test/smoke/consumer.{mjs,cjs}`: вектор подписи, вебхук, настоящий `fetch` к локальному серверу, `instanceof PspApiError` — пройден на Node 20.10, 22.20, 24.9 (Node 18 локально нет — проверит матрица CI); тесты публичного API `test/types/public-api.test-d.ts`. `yarn ci` включает `smoke`
 - [x] 8. Документация пакета: `README.md` на английском — установка, быстрый старт, опции и env, testnet/mainnet по ключу, рецепты NestJS (провайдер `useFactory` + `rawBody: true`), Express (`express.raw`), Fastify (парсер `Buffer` в своей области), Next.js (`request.arrayBuffer()`), чистый Node.js; инвойсы (идемпотентность по `externalId`, списки и `listAll`, отмена, статусы), вебхуки (шаги проверки, коды отказа и ответы, события и что делать, правила обработчика, `signWebhook` для тестов), настройки и журнал доставок, ошибки (классы, коды 13.14 с `details`, разбор `401`, неизвестный исход), повторы, опции запроса и `getResponseMeta`, логирование, смена секрета, форматы данных, низкоуровневая подпись; `CHANGELOG.md`; `examples/` — `create-invoice.ts`, `express-webhook.ts`, `fastify-webhook.ts`, `nextjs-route.ts`, `nestjs/` (модуль, сервис, контроллер, `main.ts`), общий `handle-event.ts`. Примеры проверяет `yarn typecheck` (`tsc -p examples`, путь `@qubiq/psp-sdk` → `src`), для этого в devDependencies — express, fastify, @nestjs/common и core
 - [~] 9. CI на GitHub-hosted раннерах (`.github/workflows/`): `ci.yml` — на push в `dev`/`main` и PR: `yarn ci` на Node 22 и матрица Node 18/20/22/24 (`yarn test` + `yarn smoke`, установка с `--ignore-engines`: fastify и NestJS примеров требуют Node 20+); `release.yml` — по тегу `v*`: тег = версия package.json, `yarn ci`, `npm publish --access public` с секретом `NPM_TOKEN`, `--provenance` только у публичного репозитория. Локально весь набор тестов пройден на Node 20.10, 22.20, 24.9. Не проверено: сами workflow на GitHub — origin `qubic-psp/node-sdk` ещё не создан
-- [ ] 10. Живая проверка на testnet (`yarn test:live`, ключ test-мерчанта от владельца)
+- [~] 10. Живая проверка на testnet: готов `test/live/live.test.ts` (`yarn test:live`, свой `vitest.live.config.ts`; без env `PSP_E2E_API_URL`/`PSP_E2E_API_KEY`/`PSP_E2E_API_SECRET` пропускается): аккаунт и сеть ключа, создание инвойса `201` → повтор `200` → `409 invoice_conflict` с другой суммой, чтение, список по `externalId`, история, отмена и повторная отмена, настройки вебхука, тестовый вебхук — его тело и заголовки попытки из журнала проверяются `verifyWebhook` SDK (подпись настоящего webhook-service), журнал доставок. По ходу: `DeliveryRequestHeaders` стал литералом типа — интерфейс не передавался в `verifyWebhook({ headers })`. Ждёт ключ test-мерчанта от владельца
 - [ ] 11. Первая публикация 0.1.0 (шаги владельца по одному)
-- [ ] 12. Документация вокруг: страница «SDK» в merchant-ui `/docs` (ru + en), DOCS, отчёт security-auditor
+- [~] 12. Документация вокруг: страница `/docs/sdk` (ru + en) в merchant-ui — `b6f1d2d` в `dev`, не запушено (push = выкладка сайта; страница должна выйти вместе с публикацией пакета); DOCS — строки репозитория в README §1 и §10 и CLAUDE.md, `9c0391d` в `main`, не запушено (ссылки на `qubic-psp/node-sdk` заработают, когда репозиторий появится); отчёт security-auditor `DOCS/security/node-sdk.md` — в работе
 
 ## Коммиты стадий
 
@@ -55,6 +55,7 @@ npm-пакет `@qubiq/psp-sdk` — SDK для бекенда мерчанта: 
 | 6      | `dae2ae3` |
 | 7      | `af976e2` |
 | 8      | `c16fe0f` |
+| 9      | `545f8a5` |
 
 ## Найденные расхождения со спекой
 
