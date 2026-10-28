@@ -76,4 +76,4 @@ npm-пакет `@qubiq/psp-sdk` — SDK для бекенда мерчанта: 
 4. `main` = `dev`, тег `v0.1.0` на `main` → `release.yml` публикует; после первой публикации — trusted publishing (OIDC) вместо токена.
 5. После публикации: push `dev` merchant-ui (страница `/docs/sdk`, коммиты `b6f1d2d`, `819c17f`) и push `main` DOCS (`9c0391d`, `8fcbf0f`).
 
-Неудачный вызов `yarn ci` локально — Node 22 из nvm (`PATH=$HOME/.nvm/versions/node/v22.20.0/bin:$PATH`); смоук на других версиях — `SMOKE_NODES="…/v20.10.0/bin/node …/v24.9.0/bin/node" yarn smoke`.
+Локально `yarn ci` запускается на Node 22 из nvm (`PATH=$HOME/.nvm/versions/node/v22.20.0/bin:$PATH`); смоук на других версиях — `SMOKE_NODES="…/v20.10.0/bin/node …/v24.9.0/bin/node" yarn smoke`.
