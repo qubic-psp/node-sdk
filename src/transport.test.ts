@@ -74,6 +74,19 @@ describe('signed requests', () => {
     await expect(transport().call('getInvoice', { path: { invoiceId: '' } })).rejects.toThrow(TypeError);
   });
 
+  it('refuses a dot id that the URL parser would drop from the path', async () => {
+    await expect(transport().call('getInvoice', { path: { invoiceId: '.' } })).rejects.toThrow(/must be an id/);
+    await expect(transport().call('getInvoice', { path: { invoiceId: '..' } })).rejects.toThrow(/must be an id/);
+    expect(gw.requests).toHaveLength(0);
+  });
+
+  it('refuses broken per-call numbers instead of retrying forever', async () => {
+    await expect(transport().call('getAccount', { options: { maxRetries: Number.NaN } })).rejects.toThrow(/maxRetries/);
+    await expect(transport().call('getAccount', { options: { timeoutMs: 0 } })).rejects.toThrow(/timeoutMs/);
+    await expect(transport().call('getAccount', { options: { timeoutMs: 2 ** 31 } })).rejects.toThrow(/timeoutMs/);
+    expect(gw.requests).toHaveLength(0);
+  });
+
   it('refuses a malformed clientRequestId before sending', async () => {
     await expect(transport().call('getAccount', { options: { clientRequestId: 'has space' } })).rejects.toThrow(
       /clientRequestId/,
@@ -256,6 +269,21 @@ describe('retries (gateway 13.10)', () => {
     const settings = await transport().call<object>('setWebhookUrl', { body: { url: 'https://shop.example/hook' } });
     expect(getResponseMeta(settings)?.status).toBe(202);
     expect(gw.requests).toHaveLength(1);
+  });
+
+  it('the pause between attempts is capped at 60 s (±20 %) whatever the base', async () => {
+    gw.fallback = () => apiError(503, 'service_unavailable');
+    const controller = new AbortController();
+    const delays: number[] = [];
+    const call = transport({
+      retryBaseDelayMs: 10 * 60_000,
+      onRetry: ({ delayMs }) => {
+        delays.push(delayMs);
+        controller.abort(new Error('enough'));
+      },
+    }).call('getAccount', { options: { signal: controller.signal } });
+    await expect(call).rejects.toThrow('enough');
+    expect(delays[0]).toBeLessThanOrEqual(72_000);
   });
 
   it('maxRetries: 0 per call turns retries off', async () => {

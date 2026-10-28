@@ -1,6 +1,10 @@
-# Publishes the package to npmjs.com when a tag v<version> is pushed. Needs the repository secret NPM_TOKEN
-# (an npm automation token with publish rights to @qubiq). Provenance is added for a public repository only:
-# npm refuses it for private ones.
+# Publishes the package to npmjs.com when a tag v<version> is pushed on a commit of main.
+#
+# build   — no secrets: install, all checks, `npm pack`; the tarball goes on as an artifact.
+# publish — the GitHub environment `npm` (protection rules: required reviewer, tags v* only) holds the secret
+#           NPM_TOKEN; it installs nothing and runs no package scripts: `npm publish <tarball> --ignore-scripts`.
+# Provenance is added for a public repository only (npm refuses it for private ones). After the first publish the
+# token can be replaced by npm trusted publishing (OIDC) for this workflow.
 name: release
 
 on:
@@ -9,23 +13,46 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
-          cache: yarn
-          registry-url: https://registry.npmjs.org
+      - name: The tag is on main and equals the version of package.json
+        run: |
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+          test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
       - run: yarn install --frozen-lockfile
-      - name: The tag equals the version of package.json
-        run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
       - run: yarn ci
+      - run: npm pack --pack-destination dist-pack
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: package
+          path: dist-pack/*.tgz
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: package
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
       - name: Publish
-        run: npm publish --access public ${{ github.event.repository.private == false && '--provenance' || '' }}
+        run: npm publish ./*.tgz --access public --ignore-scripts ${{ github.event.repository.private == false && '--provenance' || '' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

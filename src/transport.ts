@@ -1,5 +1,5 @@
 // One call of an operation: URL and body built once, every attempt signed anew, retries by gateway 13.10.
-import type { PspResponseInfo, ResolvedConfig } from './config';
+import { MAX_TIMER_MS, type PspResponseInfo, type ResolvedConfig } from './config';
 import {
   PspApiError,
   PspAuthError,
@@ -64,6 +64,9 @@ export interface CallInput {
 
 const CLIENT_REQUEST_ID_RE = /^[\x21-\x7E]{1,128}$/;
 
+/** Longest pause between attempts before the jitter. */
+const MAX_BACKOFF_MS = 60_000;
+
 /** Error codes of connections that surely did not deliver the request. */
 const NOT_SENT_CODES = new Set([
   'ECONNREFUSED',
@@ -105,10 +108,13 @@ function sleep(ms: number, signal: AbortSignal | undefined): Promise<void> {
       clearTimeout(timer);
       reject(signal?.reason as Error);
     };
-    const timer = setTimeout(() => {
-      signal?.removeEventListener('abort', onAbort);
-      resolve();
-    }, ms);
+    const timer = setTimeout(
+      () => {
+        signal?.removeEventListener('abort', onAbort);
+        resolve();
+      },
+      Math.min(ms, MAX_TIMER_MS),
+    );
     signal?.addEventListener('abort', onAbort, { once: true });
   });
 }
@@ -142,6 +148,8 @@ export class Transport {
     const path = route.path.replace(/\{(\w+)\}/g, (_, name: string) => {
       const value = input.path?.[name];
       if (typeof value !== 'string' || value === '') throw new TypeError(`${name} is required`);
+      // `.` and `..` survive percent-encoding and the URL parser would drop them, changing the path
+      if (value === '.' || value === '..') throw new TypeError(`${name} must be an id`);
       return pathSegment(value);
     });
     const { url, target } = resolveTarget(this.#config.baseUrl, `${path}${buildQuery(input.query)}`);
@@ -151,10 +159,16 @@ export class Transport {
       throw new TypeError('clientRequestId must be 1–128 printable ASCII characters without spaces');
     }
     const timeoutMs = options.timeoutMs ?? this.#config.timeoutMs;
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0 || timeoutMs > MAX_TIMER_MS) {
+      throw new TypeError(`timeoutMs must be from 1 to ${MAX_TIMER_MS}`);
+    }
+    const maxRetries = options.maxRetries ?? this.#config.maxRetries;
+    if (!Number.isInteger(maxRetries) || maxRetries < 0)
+      throw new TypeError('maxRetries must be a non-negative integer');
     const state: RetryState = {
       rule: route.retry,
       attempt: 0,
-      maxRetries: options.maxRetries ?? this.#config.maxRetries,
+      maxRetries,
       authRetried: false,
       internalRetried: false,
     };
@@ -335,7 +349,8 @@ export class Transport {
   /** Pause before the next attempt, or `null` when the error must be thrown. */
   #retryDelay(state: RetryState, error: PspError): number | null {
     if (state.attempt > state.maxRetries) return null;
-    const backoff = Math.round(this.#config.retryBaseDelayMs * 2 ** (state.attempt - 1) * (0.8 + Math.random() * 0.4));
+    const exponential = Math.min(this.#config.retryBaseDelayMs * 2 ** Math.min(state.attempt - 1, 30), MAX_BACKOFF_MS);
+    const backoff = Math.round(exponential * (0.8 + Math.random() * 0.4));
 
     const permanentConnection =
       error instanceof PspConnectionError && errorCodes(error.cause).some((c) => TLS_CODE_RE.test(c));

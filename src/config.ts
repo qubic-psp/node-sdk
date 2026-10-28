@@ -5,7 +5,11 @@ export type PspNet = 'testnet' | 'mainnet';
 
 /** Something the SDK wants the integrator to know, e.g. that the request was signed with the previous key. */
 export interface PspWarning {
-  code: 'deprecated_api_key';
+  /**
+   * `deprecated_api_key` — a request was signed with the previous API key;
+   * `webhook_previous_secret` — a webhook matched `previousApiSecret`: finish the rotation and remove it.
+   */
+  code: 'deprecated_api_key' | 'webhook_previous_secret';
   message: string;
   /** For `deprecated_api_key`: until when the previous key works (ISO 8601). */
   validUntil?: string;
@@ -81,7 +85,11 @@ export interface PspClientOptions {
 }
 
 const KEY_RE = /^psp_pk_(test_|live_)?[0-9A-Za-z]{24}$/;
-const SECRET_RE = /^psp_sk_(test_|live_)?[0-9A-Za-z]{36}$/;
+/** Format of an API secret (gateway 13.2): `psp_sk_test_` / `psp_sk_live_` / older `psp_sk_` and 36 letters and digits. */
+export const API_SECRET_RE = /^psp_sk_(test_|live_)?[0-9A-Za-z]{36}$/;
+
+/** Longest delay a Node.js timer takes; a longer one fires at once. */
+export const MAX_TIMER_MS = 2_147_483_647;
 
 /** Network of a key or a secret by its prefix. */
 export function netOfCredential(credential: string): PspNet {
@@ -147,7 +155,7 @@ export function resolveConfig(options: PspClientOptions, sdkUserAgent: string): 
     options.apiSecret ?? env('PSP_API_SECRET'),
     'apiSecret',
     'PSP_API_SECRET',
-    SECRET_RE,
+    API_SECRET_RE,
     'psp_sk_test_ + 36 letters and digits',
   );
   const net = netOfCredential(apiKey);
@@ -162,7 +170,7 @@ export function resolveConfig(options: PspClientOptions, sdkUserAgent: string): 
           rawPrevious,
           'previousApiSecret',
           'PSP_API_PREVIOUS_SECRET',
-          SECRET_RE,
+          API_SECRET_RE,
           'psp_sk_test_ + 36 letters and digits',
         );
   if (previousApiSecret !== undefined && netOfCredential(previousApiSecret) !== net) {
@@ -177,7 +185,8 @@ export function resolveConfig(options: PspClientOptions, sdkUserAgent: string): 
   try {
     url = new URL(rawBaseUrl);
   } catch {
-    throw new TypeError(`baseUrl is not a URL: ${JSON.stringify(rawBaseUrl)}`);
+    // The value is not printed: a mixed-up environment variable could put a secret into the logs
+    throw new TypeError('baseUrl is not a valid URL');
   }
   if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new TypeError('baseUrl must be https://');
   if (url.protocol === 'http:' && !LOCAL_HOSTS.has(url.hostname) && options.allowInsecureHttp !== true) {
@@ -191,7 +200,7 @@ export function resolveConfig(options: PspClientOptions, sdkUserAgent: string): 
   if (!fetchImpl) throw new TypeError('No global fetch: use Node.js 18+ or pass the fetch option');
 
   const timeoutMs = nonNegative(options.timeoutMs, 180_000, 'timeoutMs');
-  if (timeoutMs === 0) throw new TypeError('timeoutMs must be positive');
+  if (timeoutMs === 0 || timeoutMs > MAX_TIMER_MS) throw new TypeError(`timeoutMs must be from 1 to ${MAX_TIMER_MS}`);
 
   return {
     apiKey,

@@ -85,7 +85,6 @@ describe.skipIf(!enabled)('live testnet', () => {
       body: delivery.body,
       headers: attempt.requestHeaders,
       secret: apiSecret ?? '',
-      net: 'testnet',
       now: Number(attempt.requestHeaders['x-webhook-timestamp']),
     });
     expect(event.type).toBe('webhook.test');

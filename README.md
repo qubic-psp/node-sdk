@@ -102,7 +102,7 @@ const psp = new PspClient({
 | `fetch`                | global `fetch`            | Your own `fetch`, e.g. one that goes through a proxy.                                                                                                         |
 | `userAgent`            | —                         | Your product name, prepended to the SDK `User-Agent`.                                                                                                         |
 | `allowInsecureHttp`    | `false`                   | Allows `http://` on hosts other than localhost, e.g. for an internal TLS-terminating proxy.                                                                   |
-| `onWarning`            | `process.emitWarning`     | Warnings, e.g. a request signed with the [previous key](#rotating-the-api-secret).                                                                            |
+| `onWarning`            | `process.emitWarning`     | Warnings: a request signed with the [previous key](#rotating-the-api-secret), a webhook signed with `previousApiSecret`.                                      |
 | `onResponse`           | —                         | Called after every HTTP attempt. See [Logging and monitoring](#logging-and-monitoring).                                                                       |
 | `onRetry`              | —                         | Called before every retry.                                                                                                                                    |
 
@@ -386,7 +386,7 @@ try {
 2. `X-Webhook-Signature` is `v1=` plus 64 lower-case hex characters.
 3. The HMAC-SHA256 of `timestamp + "." + body` with your secret (or `previousApiSecret`) matches, compared in constant time.
 4. The body is JSON, its `id` and `type` equal `X-Webhook-Id` and `X-Webhook-Event`, and its `version` is `1`.
-5. The `chain` matches the network of your key: a live key accepts only `mainnet` webhooks.
+5. The `chain` matches the network of your secret: a `psp_sk_live_…` secret accepts only `mainnet` webhooks, a testnet secret any other chain.
 6. With `expectedMerchantId`, the body belongs to that merchant.
 
 Arguments:
@@ -414,9 +414,11 @@ Without a client (e.g. in a separate webhook service), use the standalone functi
 ```ts
 import { verifyWebhook, verifyWebhookSignature } from '@qubiq/psp-sdk';
 
-const event = verifyWebhook({ body, headers, secret: process.env.PSP_API_SECRET!, net: 'mainnet' });
+const event = verifyWebhook({ body, headers, secret: process.env.PSP_API_SECRET! });
 const { signedWith, attempt } = verifyWebhookSignature({ body, headers, secret, previousSecret });
 ```
+
+Both functions refuse to run with a missing or malformed secret, and they throw a `TypeError` rather than verify with it. An empty `previousSecret` (e.g. `PSP_API_PREVIOUS_SECRET=`) means none. The network for the `chain` check comes from the secret prefix.
 
 ### Events
 
@@ -641,9 +643,9 @@ After you rotate the secret in the cabinet:
    new PspClient({ apiKey: newKey, apiSecret: newSecret, previousApiSecret: oldSecret });
    ```
 
-   `verifyWebhookSignature()` reports `signedWith: 'previous'` while the old secret is still in use. Remove `previousApiSecret` after the switch.
+   While a webhook still matches the old secret, the client warns once through `onWarning` (`code: 'webhook_previous_secret'`). `verifyWebhookSignature()` reports it as `signedWith: 'previous'`. Remove `previousApiSecret` after the switch, about an hour later: as long as it is set, it keeps working.
 
-If the secret leaked, rotate it and switch at once.
+If the secret leaked, rotate it and switch at once, **without** `previousApiSecret`: whoever holds the leaked secret could sign webhooks with it.
 
 ## Data formats
 

@@ -218,11 +218,53 @@ describe('the body after a valid signature', () => {
     expect(
       reason(() => verifyWebhook({ ...signed(variant({})), expectedMerchantId: base['merchantId'] as string })),
     ).toBe('valid');
-    expect(reason(() => verifyWebhook({ ...signed(variant({})), net: 'mainnet' }))).toBe('chain_mismatch');
-    expect(reason(() => verifyWebhook({ ...signed(variant({})), net: 'testnet' }))).toBe('valid');
-    expect(reason(() => verifyWebhook({ ...signed(variant({ chain: 'mainnet' })), net: 'testnet' }))).toBe(
-      'chain_mismatch',
-    );
+    // The network comes from the secret: a testnet secret refuses a mainnet body, a live secret a nile body
+    expect(reason(() => verifyWebhook(signed(variant({ chain: 'mainnet' }))))).toBe('chain_mismatch');
+    const LIVE = 'psp_sk_live_9fT2kQ7mW4xL1vR8nB5cJ3hD6gZ0aY2eUq4N';
+    const nile = variant({});
+    const liveInput = {
+      ...signed(nile),
+      secret: LIVE,
+      headers: { ...signed(nile).headers, 'x-webhook-signature': signWebhook(LIVE, '1790684400', nile) },
+    };
+    expect(reason(() => verifyWebhook(liveInput))).toBe('chain_mismatch');
+  });
+
+  it('refuses an empty, malformed or mixed-network secret instead of verifying with it (fail closed)', () => {
+    const input = signed(variant({}));
+    const forged = {
+      ...input,
+      headers: { ...input.headers, 'x-webhook-signature': signWebhook('', '1790684400', input.body) },
+    };
+    expect(() => verifyWebhook({ ...forged, secret: '' })).toThrow(TypeError);
+    expect(() => verifyWebhook({ ...forged, secret: 'undefined' })).toThrow(TypeError);
+    expect(() => verifyWebhook({ ...forged, secret: 'psp_pk_3Kd9Lm2Qx7Rt5Vb8Nw1Hc4Zp' })).toThrow(TypeError);
+    expect(() => verifyWebhook({ ...forged, previousSecret: 'undefined' })).toThrow(/previousSecret/);
+    expect(() =>
+      verifyWebhook({ ...forged, previousSecret: 'psp_sk_live_9fT2kQ7mW4xL1vR8nB5cJ3hD6gZ0aY2eUq4N' }),
+    ).toThrow(/another network/);
+    // An empty previous secret (PSP_API_PREVIOUS_SECRET=) means none: the forged signature is refused
+    expect(reason(() => verifyWebhook({ ...forged, previousSecret: '' }))).toBe('signature_mismatch');
+  });
+
+  it('refuses a broken window or clock instead of turning the check off', () => {
+    const input = signed(variant({}));
+    expect(() => verifyWebhook({ ...input, toleranceSeconds: Number.NaN })).toThrow(/toleranceSeconds/);
+    expect(() => verifyWebhook({ ...input, toleranceSeconds: -1 })).toThrow(/toleranceSeconds/);
+    expect(() => verifyWebhook({ ...input, now: Number.NaN })).toThrow(/now/);
+  });
+
+  it('reports a match of the previous secret through onPreviousSecret', () => {
+    const NEW = 'psp_sk_Hq3vN8xK1mT6wR4cZ9bL2fJ7dY5gA0sEp6Wt';
+    const seen: string[] = [];
+    verifyWebhook({
+      ...signed(variant({})),
+      secret: NEW,
+      previousSecret: SECRET,
+      onPreviousSecret: (r) => seen.push(r.signedWith),
+    });
+    verifyWebhook({ ...signed(variant({})), onPreviousSecret: (r) => seen.push(r.signedWith) });
+    expect(seen).toEqual(['previous']);
   });
 
   it('aml: null reads as aml.status: null', () => {
@@ -261,14 +303,18 @@ describe('psp.webhook.verify', () => {
     expect(reason(() => live.webhook.verify(body, headers, { now: 1790683568 }))).toBe('chain_mismatch');
   });
 
-  it('accepts webhooks signed with previousApiSecret', () => {
+  it('accepts webhooks signed with previousApiSecret and warns once', () => {
+    const warnings: string[] = [];
     const rotated = new PspClient({
       apiKey: 'psp_pk_3Kd9Lm2Qx7Rt5Vb8Nw1Hc4Zp',
       apiSecret: 'psp_sk_Hq3vN8xK1mT6wR4cZ9bL2fJ7dY5gA0sEp6Wt',
       previousApiSecret: SECRET,
       baseUrl: 'https://api.nile.psp.example',
+      onWarning: (w) => warnings.push(w.code),
     });
     expect(rotated.webhook.verify(TEST_BODY, testHeaders, { now: 1790684400 }).type).toBe('webhook.test');
+    rotated.webhook.verify(TEST_BODY, testHeaders, { now: 1790684400 });
+    expect(warnings).toEqual(['webhook_previous_secret']);
   });
 });
 

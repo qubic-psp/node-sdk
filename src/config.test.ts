@@ -57,7 +57,7 @@ describe('baseUrl', () => {
   it('is required and must be https outside localhost', () => {
     vi.stubEnv('PSP_API_URL', '');
     expect(() => resolve({ ...base, baseUrl: undefined })).toThrow(/baseUrl is required/);
-    expect(() => resolve({ ...base, baseUrl: 'not a url' })).toThrow(/not a URL/);
+    expect(() => resolve({ ...base, baseUrl: SECRET })).toThrow(/^baseUrl is not a valid URL$/);
     expect(() => resolve({ ...base, baseUrl: 'http://api.psp.example' })).toThrow(/https/);
     expect(() => resolve({ ...base, baseUrl: 'ftp://api.psp.example' })).toThrow(/https/);
     expect(resolve({ ...base, baseUrl: 'http://127.0.0.1:4000' }).baseUrl).toBe('http://127.0.0.1:4000/');
@@ -85,6 +85,6 @@ describe('numbers', () => {
   it('refuses negative, fractional retries and a zero timeout', () => {
     expect(() => resolve({ ...base, maxRetries: -1 })).toThrow(/maxRetries/);
     expect(() => resolve({ ...base, maxRetries: 1.5 })).toThrow(/integer/);
-    expect(() => resolve({ ...base, timeoutMs: 0 })).toThrow(/positive/);
+    expect(() => resolve({ ...base, timeoutMs: 0 })).toThrow(/timeoutMs must be from 1/);
   });
 });

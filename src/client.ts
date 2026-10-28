@@ -40,6 +40,7 @@ export class PspClient {
     this.#apiKey = config.apiKey;
     this.account = new AccountResource(transport);
     this.invoices = new InvoicesResource(transport);
+    let warnedPreviousSecret = false;
     this.webhook = new WebhookSettingsResource(transport, (body, headers, verifyOptions) =>
       verifyWebhook({
         ...verifyOptions,
@@ -47,7 +48,14 @@ export class PspClient {
         headers,
         secret: config.apiSecret,
         previousSecret: config.previousApiSecret,
-        net: config.net,
+        onPreviousSecret: () => {
+          if (warnedPreviousSecret) return;
+          warnedPreviousSecret = true;
+          config.onWarning({
+            code: 'webhook_previous_secret',
+            message: 'A webhook was signed with previousApiSecret: finish the rotation and remove previousApiSecret',
+          });
+        },
       }),
     );
   }

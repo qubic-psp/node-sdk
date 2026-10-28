@@ -3,7 +3,7 @@
 //   X-Webhook-Signature: v1=<hex(HMAC-SHA256(key = UTF-8 bytes of the API secret, message = string to sign))>
 // The time is accepted within ±300 s, signatures are compared in constant time, and only then the JSON is parsed.
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import type { PspNet } from '../config';
+import { API_SECRET_RE, netOfCredential, type PspNet } from '../config';
 import { PspError } from '../errors';
 import type { WebhookEvent } from './events';
 
@@ -96,9 +96,12 @@ export interface VerifyWebhookSignatureInput {
   /** Raw body bytes, before any JSON parsing. */
   body: WebhookBody;
   headers: WebhookHeaders;
-  /** The API secret of the network the webhooks come from. */
+  /** The API secret `psp_sk_…` of the network the webhooks come from. */
   secret: string;
-  /** The previous secret during a rotation: the webhook passes if it matches either. */
+  /**
+   * The previous secret during a rotation: the webhook passes if it matches either. `undefined` or `''` — none.
+   * Keep it only for the switch (about an hour) and never after a leak.
+   */
   previousSecret?: string | undefined;
   /** Window of `X-Webhook-Timestamp`, seconds. Default 300. */
   toleranceSeconds?: number | undefined;
@@ -120,12 +123,37 @@ const TIMESTAMP_RE = /^[0-9]{1,12}$/;
 const SIGNATURE_RE = /^v1=([0-9a-f]{64})$/;
 
 function nowSeconds(now: number | Date | undefined): number {
-  if (now instanceof Date) return Math.floor(now.getTime() / 1000);
-  return now ?? Math.floor(Date.now() / 1000);
+  const value = now instanceof Date ? Math.floor(now.getTime() / 1000) : (now ?? Math.floor(Date.now() / 1000));
+  if (!Number.isFinite(value)) throw new TypeError('now must be a valid time');
+  return value;
+}
+
+/** Secrets after validation: a malformed or empty secret would let anyone sign a webhook, so it is a hard error. */
+function checkSecrets(input: VerifyWebhookSignatureInput): {
+  secret: string;
+  previousSecret: string | null;
+  net: PspNet;
+} {
+  if (typeof input.secret !== 'string' || !API_SECRET_RE.test(input.secret)) {
+    throw new TypeError('secret must be the API secret psp_sk_… (check the environment variable)');
+  }
+  const net = netOfCredential(input.secret);
+  const previous = input.previousSecret === undefined || input.previousSecret === '' ? null : input.previousSecret;
+  if (previous !== null) {
+    if (typeof previous !== 'string' || !API_SECRET_RE.test(previous)) {
+      throw new TypeError('previousSecret must be an API secret psp_sk_… or empty');
+    }
+    if (netOfCredential(previous) !== net) throw new TypeError('previousSecret belongs to another network than secret');
+  }
+  return { secret: input.secret, previousSecret: previous, net };
 }
 
 /** Steps 1–6 of 13.6: time window, signature format, HMAC, constant-time comparison. Throws on a failure. */
 export function verifyWebhookSignature(input: VerifyWebhookSignatureInput): WebhookSignatureResult {
+  const { secret, previousSecret } = checkSecrets(input);
+  const tolerance = input.toleranceSeconds ?? WEBHOOK_TOLERANCE_SECONDS;
+  if (!Number.isFinite(tolerance) || tolerance < 0)
+    throw new TypeError('toleranceSeconds must be a non-negative number');
   const body = toBuffer(input.body);
   const timestamp = header(input.headers, 'x-webhook-timestamp');
   const signature = header(input.headers, 'x-webhook-signature');
@@ -135,7 +163,6 @@ export function verifyWebhookSignature(input: VerifyWebhookSignatureInput): Webh
   if (!TIMESTAMP_RE.test(timestamp)) {
     throw new WebhookVerificationError('bad_timestamp', 'X-Webhook-Timestamp must be Unix seconds, digits only');
   }
-  const tolerance = input.toleranceSeconds ?? WEBHOOK_TOLERANCE_SECONDS;
   const skew = nowSeconds(input.now) - Number(timestamp);
   if (Math.abs(skew) > tolerance) {
     throw new WebhookVerificationError(
@@ -148,14 +175,14 @@ export function verifyWebhookSignature(input: VerifyWebhookSignatureInput): Webh
     throw new WebhookVerificationError('bad_signature_header', 'X-Webhook-Signature must be v1= and 64 lower-case hex');
   }
   const received = Buffer.from(match[1], 'hex');
-  const matches = (secret: string): boolean => {
-    const expected = Buffer.from(signWebhook(secret, timestamp, body).slice(3), 'hex');
+  const matches = (key: string): boolean => {
+    const expected = Buffer.from(signWebhook(key, timestamp, body).slice(3), 'hex');
     return timingSafeEqual(expected, received);
   };
   const attemptHeader = header(input.headers, 'x-webhook-attempt');
   const attempt = attemptHeader !== undefined && /^\d+$/.test(attemptHeader) ? Number(attemptHeader) : null;
-  if (matches(input.secret)) return { signedWith: 'current', timestamp: Number(timestamp), attempt };
-  if (input.previousSecret !== undefined && matches(input.previousSecret)) {
+  if (matches(secret)) return { signedWith: 'current', timestamp: Number(timestamp), attempt };
+  if (previousSecret !== null && matches(previousSecret)) {
     return { signedWith: 'previous', timestamp: Number(timestamp), attempt };
   }
   throw new WebhookVerificationError(
@@ -168,18 +195,20 @@ export function verifyWebhookSignature(input: VerifyWebhookSignatureInput): Webh
 export interface VerifyWebhookInput extends VerifyWebhookSignatureInput {
   /** Your merchant id (`psp.account.get()`); the body must carry it. */
   expectedMerchantId?: string | undefined;
-  /** Network of your secret: `mainnet` accepts only `chain: "mainnet"`, `testnet` — any other chain. */
-  net?: PspNet | undefined;
+  /** Called when the webhook matched `previousSecret`: a sign to finish the rotation and drop the old secret. */
+  onPreviousSecret?: ((result: WebhookSignatureResult) => void) | undefined;
 }
 
 type Json = Record<string, unknown>;
 
 /**
- * Verifies a webhook and returns its typed body (13.6, steps 1–7). Throws {@link WebhookVerificationError}: answer
- * with its `status` and do not process. After it returns: drop duplicates by `event.id`, store, answer `2xx`.
+ * Verifies a webhook and returns its typed body (13.6, steps 1–7). The network comes from the secret: a `psp_sk_live_…`
+ * secret accepts only `chain: "mainnet"`, a testnet secret any other chain. Throws {@link WebhookVerificationError}:
+ * answer with its `status` and do not process. After it returns: drop duplicates by `event.id`, store, answer `2xx`.
  */
 export function verifyWebhook(input: VerifyWebhookInput): WebhookEvent {
-  verifyWebhookSignature(input);
+  const signature = verifyWebhookSignature(input);
+  const net = netOfCredential(input.secret);
   const id = header(input.headers, 'x-webhook-id');
   const type = header(input.headers, 'x-webhook-event');
   if (id === undefined || type === undefined) {
@@ -221,11 +250,18 @@ export function verifyWebhook(input: VerifyWebhookInput): WebhookEvent {
   if (input.expectedMerchantId !== undefined && event['merchantId'] !== input.expectedMerchantId) {
     throw new WebhookVerificationError('merchant_mismatch', 'the webhook is for another merchant');
   }
-  if (input.net !== undefined && (event['chain'] === 'mainnet') !== (input.net === 'mainnet')) {
+  if ((event['chain'] === 'mainnet') !== (net === 'mainnet')) {
     throw new WebhookVerificationError(
       'chain_mismatch',
-      `a ${event['chain']} webhook came to a ${input.net} handler: check the webhook URL of each network`,
+      `a ${event['chain']} webhook came to a ${net} handler: check the webhook URL of each network`,
     );
+  }
+  if (signature.signedWith === 'previous') {
+    try {
+      input.onPreviousSecret?.(signature);
+    } catch {
+      // a failing hook must not change the outcome of the verification
+    }
   }
   // 13.3: `aml: null` reads as `aml.status: null`
   const payment = (data as Json)['payment'];
