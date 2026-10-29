@@ -1,8 +1,8 @@
-# Publishes the package to npmjs.com when a tag v<version> is pushed on a commit of main.
+# Stages the package on npmjs.com when a tag v<version> is pushed on a commit of main; a maintainer approves it with 2FA.
 #
 # build   — no secrets: install, all checks, `npm pack`; the tarball goes on as an artifact.
 # publish — the GitHub environment `npm` (protection rules: required reviewer, tags v* only) holds the secret
-#           NPM_TOKEN; it installs nothing and runs no package scripts: `npm publish <tarball> --ignore-scripts`.
+#           NPM_TOKEN (stage-only); it installs only the pinned npm CLI and runs no package scripts: `npm stage publish <tarball>`.
 # Provenance is added for a public repository only (npm refuses it for private ones). After the first publish the
 # token can be replaced by npm trusted publishing (OIDC) for this workflow.
 name: release
@@ -54,7 +54,12 @@ jobs:
           node-version: 22
           package-manager-cache: false
           registry-url: https://registry.npmjs.org
-      - name: Publish
-        run: npm publish ./*.tgz --access public --ignore-scripts ${{ github.event.repository.private == false && '--provenance' || '' }}
+      # Staged publishing (npm 11.15+; Node 22 ships npm 10): the version waits in the staged queue of npmjs.com until a
+      # maintainer approves it with 2FA — the Staged Packages page or `npm stage approve <id>`. NPM_TOKEN is a stage-only
+      # granular token: npm refuses a direct publish with it, so a leaked token cannot release anything by itself.
+      - name: npm with staged publishing
+        run: npm install --global --ignore-scripts npm@11.21.1
+      - name: Stage
+        run: npm stage publish ./*.tgz --access public --ignore-scripts ${{ github.event.repository.private == false && '--provenance' || '' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

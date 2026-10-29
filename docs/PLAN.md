@@ -78,8 +78,8 @@ npm-пакет `@qubiq-psp/sdk` — SDK для бекенда мерчанта: 
 
 1. ~~Репозиторий `qubic-psp/node-sdk`~~ — создан (публичный), origin `git@qubic-psp:qubic-psp/node-sdk.git`, CI зелёный.
 2. ~~Живая проверка~~ — пройдена 2026-10-28 (`.env.live` с ключом test-мерчанта лежит локально, в `.gitignore`).
-3. Организация `qubiq-psp` на npmjs.com — создана владельцем 2026-10-29 (2FA, второй Owner — тимлид; SDK-007), токен публикации (granular, только `@qubiq-psp/sdk`) → секрет `NPM_TOKEN` окружения `npm` в GitHub (правила: обязательный ревьюер, только теги `v*`).
-4. `main` = `dev`, тег `v0.1.0` на `main` → `release.yml` публикует; после первой публикации — trusted publishing (OIDC) вместо токена.
+3. Организация `qubiq-psp` на npmjs.com — создана владельцем 2026-10-29 (2FA, второй Owner — тимлид; SDK-007), токен **stage-only** (granular, «Read and write (stage only)», организация `qubiq-psp`) → секрет `NPM_TOKEN` окружения `npm` в GitHub (правила: обязательный ревьюер, только теги `v*`). С 2026-10-29 `release.yml` не публикует сразу, а ставит версию в очередь (`npm stage publish`, npm 11.21.1, staged publishing создаёт и новые пакеты): живой её делает владелец ключом 2FA — страница Staged Packages на npmjs.com или `npm stage approve <id>`. Прямой `npm publish` таким токеном npm отклоняет; токены в обход 2FA npm ограничивает с 2026-08 и снимает с прямой публикации в 2027-01.
+4. `main` = `dev`, тег `v0.1.0` на `main` → `release.yml` ставит в очередь → владелец подтверждает; после первой публикации — trusted publishing (OIDC, `npm trust github … --allow-stage-publish`) вместо токена.
 5. После публикации: push `dev` merchant-ui (страница `/docs/sdk`, коммиты `b6f1d2d`, `819c17f`). DOCS (`9c0391d`, `8fcbf0f`) запушен 2026-10-28.
 
 Локально `yarn ci` запускается на Node 22 из nvm (`PATH=$HOME/.nvm/versions/node/v22.20.0/bin:$PATH`); смоук на других версиях — `SMOKE_NODES="…/v20.10.0/bin/node …/v24.9.0/bin/node" yarn smoke`.
