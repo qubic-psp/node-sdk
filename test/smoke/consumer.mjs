@@ -66,9 +66,9 @@ export async function run(sdk, flavor) {
   } finally {
     server.close();
   }
-  console.log(`${flavor} ok — @qubiq/psp-sdk ${VERSION} on Node.js ${process.version}`);
+  console.log(`${flavor} ok — @qubiq-psp/sdk ${VERSION} on Node.js ${process.version}`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  await run(await import('@qubiq/psp-sdk'), 'esm');
+  await run(await import('@qubiq-psp/sdk'), 'esm');
 }

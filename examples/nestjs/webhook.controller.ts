@@ -2,7 +2,7 @@
 import { Controller, HttpCode, HttpException, InternalServerErrorException, Post, Req } from '@nestjs/common';
 import type { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
-import { PspClient, WebhookVerificationError } from '@qubiq/psp-sdk';
+import { PspClient, WebhookVerificationError } from '@qubiq-psp/sdk';
 import { handleEvent } from '../handle-event';
 
 @Controller('psp')

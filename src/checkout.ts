@@ -153,7 +153,7 @@ export interface CheckoutUrlOptions {
 
 /** A link to the payment page for an iframe. */
 export interface CheckoutLink {
-  /** `https://pay…/#v1.…` — the `src` of the iframe, or the `url` of `<PspCheckout>` from `@qubiq/psp-react`. */
+  /** `https://pay…/#v1.…` — the `src` of the iframe, or the `url` of `<PspCheckout>` from `@qubiq-psp/react`. */
   url: string;
   /** The token alone (after `#`). */
   token: string;

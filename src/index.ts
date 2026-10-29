@@ -1,4 +1,4 @@
-// Public entry of @qubiq/psp-sdk.
+// Public entry of @qubiq-psp/sdk.
 export { CHECKOUT_DEFAULT_TTL_SECONDS, CHECKOUT_MAX_TTL_SECONDS, createCheckoutToken } from './checkout';
 export type {
   CheckoutBranding,

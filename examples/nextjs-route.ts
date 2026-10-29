@@ -1,5 +1,5 @@
 // Next.js App Router: app/api/psp/webhook/route.ts. The Node.js runtime is needed for node:crypto.
-import { PspClient, WebhookVerificationError } from '@qubiq/psp-sdk';
+import { PspClient, WebhookVerificationError } from '@qubiq-psp/sdk';
 import { handleEvent } from './handle-event';
 
 export const runtime = 'nodejs';

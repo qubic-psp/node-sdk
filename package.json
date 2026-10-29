@@ -1,5 +1,5 @@
 {
-  "name": "@qubiq/psp-sdk",
+  "name": "@qubiq-psp/sdk",
   "version": "0.1.0",
   "description": "Node.js SDK for the PSP merchant API: signed requests, invoices, webhook settings and webhook signature verification",
   "license": "MIT",

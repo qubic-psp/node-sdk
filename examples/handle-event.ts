@@ -1,5 +1,5 @@
 // What a webhook handler does with a verified event. Shared by the framework examples.
-import type { Invoice, WebhookEvent } from '@qubiq/psp-sdk';
+import type { Invoice, WebhookEvent } from '@qubiq-psp/sdk';
 
 /** Last applied snapshot per invoice: webhooks of one invoice may come out of order after a manual redelivery. */
 const lastApplied = new Map<string, string>();

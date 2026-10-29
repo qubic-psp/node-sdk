@@ -1,6 +1,6 @@
 // Express 4.17+ / 5: the webhook route reads the raw body with express.raw — register it BEFORE app.use(express.json()).
 import express from 'express';
-import { PspClient, WebhookVerificationError, type WebhookEvent } from '@qubiq/psp-sdk';
+import { PspClient, WebhookVerificationError, type WebhookEvent } from '@qubiq-psp/sdk';
 import { handleEvent } from './handle-event';
 
 const psp = new PspClient();

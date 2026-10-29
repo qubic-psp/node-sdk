@@ -1,4 +1,4 @@
-# @qubiq/psp-sdk
+# @qubiq-psp/sdk
 
 Node.js SDK for the PSP merchant API. Use it on your backend to accept crypto payments: create invoices, check their state, manage the webhook endpoint, and verify the webhooks the platform sends you.
 
@@ -33,8 +33,8 @@ Node.js SDK for the PSP merchant API. Use it on your backend to accept crypto pa
 ## Installation
 
 ```bash
-npm install @qubiq/psp-sdk
-# or: yarn add @qubiq/psp-sdk / pnpm add @qubiq/psp-sdk
+npm install @qubiq-psp/sdk
+# or: yarn add @qubiq-psp/sdk / pnpm add @qubiq-psp/sdk
 ```
 
 Requires Node.js 18 or newer: the SDK uses the built-in `fetch` and `node:crypto`.
@@ -44,7 +44,7 @@ Requires Node.js 18 or newer: the SDK uses the built-in `fetch` and `node:crypto
 Take the API key, the API secret and the API URL from the merchant cabinet (**Integration → API keys**). Each network has its own pair: a `psp_pk_test_…` key works only in testnet, a `psp_pk_live_…` key only in mainnet.
 
 ```ts
-import { PspClient } from '@qubiq/psp-sdk';
+import { PspClient } from '@qubiq-psp/sdk';
 
 const psp = new PspClient({
   apiKey: process.env.PSP_API_KEY, // psp_pk_test_…
@@ -136,7 +136,7 @@ Register the client as a provider and inject it by its class:
 // psp.module.ts
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PspClient } from '@qubiq/psp-sdk';
+import { PspClient } from '@qubiq-psp/sdk';
 
 @Global()
 @Module({
@@ -303,7 +303,7 @@ const invoice = await psp.invoices.create({
 That is why the SDK may safely repeat `create` after a lost connection.
 
 ```ts
-import { getResponseMeta, isPspApiError } from '@qubiq/psp-sdk';
+import { getResponseMeta, isPspApiError } from '@qubiq-psp/sdk';
 
 try {
   const invoice = await psp.invoices.create(params);
@@ -390,8 +390,8 @@ const { url, expiresAt } = psp.checkout.createUrl(invoice, {
 ```
 
 ```tsx
-// frontend: npm install @qubiq/psp-react
-import { PspCheckout } from '@qubiq/psp-react';
+// frontend: npm install @qubiq-psp/react
+import { PspCheckout } from '@qubiq-psp/react';
 
 <PspCheckout url={url} onPaid={() => showThankYou()} onExpired={() => offerNewInvoice()} />;
 // or without React: <iframe src={url} allow="clipboard-write" style="width:100%;border:0"></iframe>
@@ -423,7 +423,7 @@ How it works:
 On every change of an invoice, the platform sends a `POST` to your webhook URL. The body is a full snapshot of the invoice plus the payment that caused the change. The body is signed with your API secret: the same secret that signs your API requests.
 
 ```ts
-import { WebhookVerificationError } from '@qubiq/psp-sdk';
+import { WebhookVerificationError } from '@qubiq-psp/sdk';
 
 try {
   const event = psp.webhook.verify(rawBody, headers);
@@ -469,7 +469,7 @@ Arguments:
 Without a client (e.g. in a separate webhook service), use the standalone functions:
 
 ```ts
-import { verifyWebhook, verifyWebhookSignature } from '@qubiq/psp-sdk';
+import { verifyWebhook, verifyWebhookSignature } from '@qubiq-psp/sdk';
 
 const event = verifyWebhook({ body, headers, secret: process.env.PSP_API_SECRET! });
 const { signedWith, attempt } = verifyWebhookSignature({ body, headers, secret, previousSecret });
@@ -528,7 +528,7 @@ switch (event.type) {
 `signWebhook()` signs a body the way the platform does, so your tests can send valid webhooks to your own handler:
 
 ```ts
-import { signWebhook } from '@qubiq/psp-sdk';
+import { signWebhook } from '@qubiq-psp/sdk';
 
 const body = JSON.stringify(fakeEvent);
 const timestamp = Math.floor(Date.now() / 1000);
@@ -718,7 +718,7 @@ If the secret leaked, rotate it and switch at once, **without** `previousApiSecr
 If you call the API with your own HTTP client, `signRequest()` produces the four signature headers:
 
 ```ts
-import { signRequest } from '@qubiq/psp-sdk';
+import { signRequest } from '@qubiq-psp/sdk';
 
 const body = JSON.stringify(params); // serialize once: sign and send the same bytes
 const { headers } = signRequest({ apiKey, apiSecret, method: 'POST', target: '/api/v1/invoices', body });

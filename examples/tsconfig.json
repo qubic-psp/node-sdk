@@ -4,7 +4,7 @@
   "compilerOptions": {
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "paths": { "@qubiq/psp-sdk": ["../src/index.ts"] }
+    "paths": { "@qubiq-psp/sdk": ["../src/index.ts"] }
   },
   "include": ["."]
 }

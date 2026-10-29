@@ -1,6 +1,6 @@
 // The client as a NestJS provider: inject PspClient anywhere by its class.
 import { Global, Module } from '@nestjs/common';
-import { PspClient } from '@qubiq/psp-sdk';
+import { PspClient } from '@qubiq-psp/sdk';
 
 @Global()
 @Module({

@@ -1,6 +1,6 @@
 // Fastify 5: a scope with a Buffer parser for JSON, so only the webhook route gets the raw body.
 import Fastify from 'fastify';
-import { PspClient, WebhookVerificationError } from '@qubiq/psp-sdk';
+import { PspClient, WebhookVerificationError } from '@qubiq-psp/sdk';
 import { handleEvent } from './handle-event';
 
 const psp = new PspClient();

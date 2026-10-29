@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PspClient, type Invoice } from '@qubiq/psp-sdk';
+import { PspClient, type Invoice } from '@qubiq-psp/sdk';
 
 @Injectable()
 export class InvoicesService {

@@ -1,6 +1,6 @@
 // Creates an invoice and prints what to show to the buyer.
 //   PSP_API_KEY=psp_pk_test_… PSP_API_SECRET=psp_sk_test_… PSP_API_URL=https://… npx tsx examples/create-invoice.ts order-10530
-import { PspClient, PspConnectionError, getResponseMeta, isPspApiError } from '@qubiq/psp-sdk';
+import { PspClient, PspConnectionError, getResponseMeta, isPspApiError } from '@qubiq-psp/sdk';
 
 const psp = new PspClient(); // reads PSP_API_KEY, PSP_API_SECRET and PSP_API_URL
 
