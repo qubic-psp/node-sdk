@@ -31,7 +31,8 @@ jobs:
           test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
       - run: yarn install --frozen-lockfile
       - run: yarn ci
-      - run: npm pack --pack-destination dist-pack
+      # npm pack does not create the destination folder
+      - run: mkdir -p dist-pack && npm pack --pack-destination dist-pack
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: package
