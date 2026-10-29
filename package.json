@@ -3,6 +3,14 @@
   "version": "0.1.0",
   "description": "Node.js SDK for the PSP merchant API: signed requests, invoices, webhook settings and webhook signature verification",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qubic-psp/node-sdk.git"
+  },
+  "homepage": "https://github.com/qubic-psp/node-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/qubic-psp/node-sdk/issues"
+  },
   "type": "module",
   "engines": {
     "node": ">=18"
