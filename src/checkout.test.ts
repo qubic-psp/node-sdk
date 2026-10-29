@@ -67,6 +67,10 @@ describe('vectors of 20.4', () => {
 describe('validation of 20.2–20.3', () => {
   it('refuses a malformed key, invoice id or expiry', () => {
     expect(() => createCheckoutToken({ ...base, apiKey: 'psp_pk_short' })).toThrow(/apiKey/);
+    expect(() => createCheckoutToken({ ...base, apiSecret: 'psp_sk_short' })).toThrow(/apiSecret/);
+    expect(() => createCheckoutToken({ ...base, apiSecret: SECRET.replace('psp_sk_', 'psp_sk_live_') })).toThrow(
+      /same net/,
+    );
     expect(() => createCheckoutToken({ ...base, invoiceId: INVOICE.toUpperCase() })).toThrow(/uuid/);
     expect(() => createCheckoutToken({ ...base, expiresAt: NOW })).toThrow(/future/);
     expect(() => createCheckoutToken({ ...base, expiresAt: NOW + 604_801 })).toThrow(/7 days/);
@@ -82,6 +86,8 @@ describe('validation of 20.2–20.3', () => {
     expect(bad({ logoUrl: 'http://shop.example/logo.png' })).toThrow(/https/);
     expect(bad({ logoUrl: 'javascript:alert(1)' })).toThrow(/https/);
     expect(bad({ logoUrl: 'https://user:pass@shop.example/logo.png' })).toThrow(/credentials/);
+    // An empty fragment: URL.hash is '' for it, gateway refuses it all the same
+    expect(bad({ logoUrl: 'https://shop.example/logo.png#' })).toThrow(/fragment/);
     expect(bad({ accentColor: 'red' })).toThrow(/#rrggbb/);
     expect(bad({ theme: 'neon' })).toThrow(/theme/);
     expect(bad({ title: 'x'.repeat(101) })).toThrow(/100/);

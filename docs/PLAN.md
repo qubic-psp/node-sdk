@@ -46,6 +46,7 @@ npm-пакет `@qubiq/psp-sdk` — SDK для бекенда мерчанта: 
 ### Виджет оплаты (решение владельца 2026-10-28, план `lively-riding-badger`)
 
 - [x] `psp.checkout.createUrl(invoice, { branding, locale, expiresInSeconds })` и `createCheckoutToken()` (`src/checkout.ts`) по gateway [20.2–20.4](../../gateway/docs/20-pay.md): токен `v1.<payload>.<signature>` подписан секретом API без запроса в сеть, оформление проверяется по 20.3 (длина — строка JavaScript, UTF-16, как в gateway), срок по умолчанию 24 ч, не больше 7 суток; опция `checkoutUrl` / env `PSP_CHECKOUT_URL`; тесты на оба вектора 20.4 и отрицательные случаи (`src/checkout.test.ts`); README «Payment widget», CHANGELOG. Не опубликовано
+- [x] Повторный аудит виджета (`DOCS/security/node-sdk.md`, SDK-012…014, 2026-10-29), исправлено в этом коммите: README «Authorize first» и строка в JSDoc `createUrl()` — ссылка только покупателю этого заказа, payload читается без секрета, персональных данных в оформлении нет (SDK-012); `createCheckoutToken()` проверяет секрет по формату `API_SECRET_RE` и сеть секрета по сети ключа, `logoUrl` с `#` в любом месте (и пустым фрагментом) отвергается, как в gateway (SDK-014). SDK-013 (умолчание `checkoutUrl`) — не меняется: у `baseUrl` умолчания тоже нет, оба адреса мерчант задаёт сам. README: оформление проверяют `createUrl()` и `createCheckoutToken()`, конструктор — `checkoutUrl`
 
 ## Коммиты стадий
 
@@ -62,6 +63,7 @@ npm-пакет `@qubiq/psp-sdk` — SDK для бекенда мерчанта: 
 | 9               | `545f8a5`            |
 | 10 (подготовка) | `16ff01b`, `ca631f2` |
 | аудит           | `186e40e`            |
+| аудит виджета   | этот коммит          |
 
 ## Найденные расхождения со спекой
 

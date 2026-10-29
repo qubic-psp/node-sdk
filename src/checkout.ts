@@ -3,6 +3,7 @@
 //   token = "v1." + payload + "." + signature
 //   payload = base64url(JSON {k, i, e, b?, l?}),  signature = base64url(HMAC-SHA256(secret, "psp-checkout-v1." + payload))
 import { createHmac } from 'node:crypto';
+import { API_SECRET_RE, netOfCredential } from './config';
 
 /** How the payment page looks. Every field is optional; text is shown as text, the logo only as an image. */
 export interface CheckoutBranding {
@@ -78,7 +79,8 @@ function logo(value: unknown): string {
     throw new TypeError('branding.logoUrl must be a valid URL');
   }
   if (url.protocol !== 'https:') throw new TypeError('branding.logoUrl must be https');
-  if (url.username || url.password || url.hash) {
+  // `includes`, not `url.hash`: an empty fragment (a trailing `#`) is refused by gateway too
+  if (url.username || url.password || value.includes('#')) {
     throw new TypeError('branding.logoUrl must not contain credentials or a fragment');
   }
   return value;
@@ -113,8 +115,12 @@ function brandingPayload(branding: CheckoutBranding): Record<string, string> | u
  */
 export function createCheckoutToken(input: CreateCheckoutTokenInput): CheckoutToken {
   if (!KEY_RE.test(input.apiKey)) throw new TypeError('apiKey must look like psp_pk_test_ + 24 letters and digits');
-  if (typeof input.apiSecret !== 'string' || !input.apiSecret.startsWith('psp_sk_')) {
-    throw new TypeError('apiSecret must be the API secret psp_sk_…');
+  if (typeof input.apiSecret !== 'string' || !API_SECRET_RE.test(input.apiSecret)) {
+    throw new TypeError('apiSecret must be the API secret psp_sk_test_ + 36 letters and digits');
+  }
+  // A secret of the other net would sign a token gateway refuses with bad_signature
+  if (netOfCredential(input.apiSecret) !== netOfCredential(input.apiKey)) {
+    throw new TypeError('apiSecret must be of the same net as apiKey');
   }
   if (!UUID_RE.test(input.invoiceId)) throw new TypeError('invoiceId must be a lower-case uuid');
   const now = seconds(input.now ?? new Date());
@@ -170,6 +176,7 @@ export class CheckoutResource {
   /**
    * Builds the payment page link for an invoice: no network call, the token is signed with the API secret.
    * Build it every time you render the order page — branding comes with each call.
+   * Build it only for the buyer who owns the order: whoever has the link sees the invoice.
    *
    * ```ts
    * const { url } = psp.checkout.createUrl(invoice, { branding: { companyName: 'My Shop' }, locale: 'en' });

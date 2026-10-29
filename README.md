@@ -399,6 +399,7 @@ import { PspCheckout } from '@qubiq/psp-react';
 
 How it works:
 
+- **Authorize first.** The link is a bearer link: whoever has it sees the invoice — the amount, the address and the payment hashes. Build it only for the signed-in buyer who owns the order, never by an order number from the request alone. The token is signed, not encrypted: anyone with the link can read the branding and `title`, so keep personal data out of them.
 - **The token.** The link carries a token after `#`. It holds the key id, the invoice id, the expiry, your branding and the locale, and it is signed with your API secret (HMAC-SHA256, its own `psp-checkout-v1.` prefix). The secret is not in the link.
 - **No tampering.** Nobody can change the invoice or the branding without breaking the signature. A browser never sends the part after `#` to a server.
 - **Data the page shows.** The page shows only what the buyer needs: no `externalId`, `description`, `metadata` or `merchantId`. After the payment window closes, the page hides the address.
@@ -411,11 +412,11 @@ How it works:
 | ------------- | ---------------------------------------------------------------------------------------------------- |
 | `companyName` | 1–64 characters (JavaScript string length), no control characters, no leading or trailing whitespace |
 | `title`       | Same rules, up to 100 characters                                                                     |
-| `logoUrl`     | `https:` URL up to 1024 characters, no credentials or fragment                                       |
+| `logoUrl`     | `https:` URL up to 1024 characters, no credentials, no `#`                                           |
 | `accentColor` | `#rrggbb`                                                                                            |
 | `theme`       | `light`, `dark` or `auto`                                                                            |
 
-The constructor and `createUrl()` throw a `TypeError` on anything else.
+`createUrl()` and `createCheckoutToken()` throw a `TypeError` on anything else; the constructor checks `checkoutUrl`.
 
 ## Webhooks
 
