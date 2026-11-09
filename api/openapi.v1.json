@@ -4085,7 +4085,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, account_closed, merchant_archived, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -4115,14 +4115,6 @@
                     "value": {
                       "errorCode": "merchant_archived",
                       "errorMessage": "The merchant is archived",
-                      "details": null
-                    }
-                  },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
-                    "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "merchant closed",
                       "details": null
                     }
                   }

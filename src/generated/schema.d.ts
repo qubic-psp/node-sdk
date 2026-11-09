@@ -2848,7 +2848,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, account_closed, merchant_archived, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
