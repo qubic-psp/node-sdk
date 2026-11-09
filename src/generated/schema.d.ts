@@ -512,7 +512,7 @@ export interface components {
             /** @example shop-example */
             name: string;
             /**
-             * @description Закрытый мерчант ответа не получает
+             * @description Мерчант в архиве (403 merchant_archived) и закрытый пользователь (403 account_closed) ответа не получают
              * @example active
              * @enum {string}
              */
@@ -532,7 +532,7 @@ export interface components {
          * @description Machine error code; clients branch on it
          * @enum {string}
          */
-        ErrorCode: "invalid_schema" | "limit_exceeded" | "password_rejected" | "wrong_password" | "invalid_token" | "invalid_code" | "invalid_credentials" | "unauthenticated" | "api_auth_failed" | "setup_required" | "reauth_required" | "permission_denied" | "owner_required" | "account_blocked" | "login_restricted" | "merchant_blocked" | "merchant_closed" | "merchant_restricted" | "ip_not_allowed" | "not_found" | "conflict" | "invalid_state" | "last_owner" | "self_action_forbidden" | "rotation_too_frequent" | "merchant_not_active" | "merchant_has_funds" | "merchant_has_open_payouts" | "merchant_has_active_invoices" | "export_in_progress" | "config_revision_conflict" | "bootstrap_already_issued" | "bootstrap_completed" | "payload_too_large" | "too_many_requests" | "internal_error" | "maintenance" | "service_unavailable" | "upstream_unavailable" | "net_required" | "merchant_required" | "net_not_configured" | "net_unavailable" | "invalid_address" | "own_address" | "dirty_recipient_forbidden" | "unknown_network" | "unknown_asset" | "network_disabled" | "asset_disabled" | "amount_out_of_range" | "insufficient_balance" | "network_fee_too_high" | "unsupported_operation" | "invoice_conflict" | "payout_conflict" | "address_locked" | "dirty_funds_not_on_address" | "invoice_has_payments" | "asset_in_use" | "tariff_not_configured" | "tx_hash_already_used" | "insufficient_payout_wallet" | "payout_wallet_stopped" | "network_service_rejected" | "operations_paused" | "address_pool_unavailable" | "network_service_unavailable" | "rate_unavailable" | "invalid_url" | "secret_not_set" | "url_not_set" | "merchant_paused" | "telegram_chat_inactive" | "telegram_unavailable";
+        ErrorCode: "invalid_schema" | "limit_exceeded" | "password_rejected" | "wrong_password" | "invalid_token" | "invalid_code" | "invalid_credentials" | "unauthenticated" | "api_auth_failed" | "pay_token_invalid" | "setup_required" | "reauth_required" | "permission_denied" | "owner_required" | "account_blocked" | "login_restricted" | "merchant_blocked" | "merchant_archived" | "account_closed" | "merchant_restricted" | "ip_not_allowed" | "not_found" | "conflict" | "invalid_state" | "last_owner" | "self_action_forbidden" | "rotation_too_frequent" | "merchant_not_active" | "merchant_has_funds" | "merchant_has_open_payouts" | "merchant_has_active_invoices" | "export_in_progress" | "config_revision_conflict" | "bootstrap_already_issued" | "bootstrap_completed" | "payload_too_large" | "too_many_requests" | "internal_error" | "maintenance" | "service_unavailable" | "upstream_unavailable" | "net_required" | "merchant_required" | "net_not_configured" | "net_unavailable" | "invalid_address" | "own_address" | "dirty_recipient_forbidden" | "unknown_network" | "unknown_asset" | "network_disabled" | "asset_disabled" | "amount_out_of_range" | "insufficient_balance" | "network_fee_too_high" | "unsupported_operation" | "invoice_conflict" | "payout_conflict" | "address_locked" | "dirty_funds_not_on_address" | "invoice_has_payments" | "asset_in_use" | "tariff_not_configured" | "tx_hash_already_used" | "insufficient_payout_wallet" | "payout_wallet_stopped" | "network_service_rejected" | "operations_paused" | "address_pool_unavailable" | "network_service_unavailable" | "rate_unavailable" | "invalid_url" | "secret_not_set" | "url_not_set" | "merchant_paused" | "telegram_chat_inactive" | "telegram_unavailable";
         ErrorResponse: {
             errorCode: components["schemas"]["ErrorCode"];
             /**
@@ -2848,7 +2848,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived, merchant_closed */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3029,7 +3029,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3241,7 +3241,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed {ip}, merchant_closed, merchant_blocked, merchant_restricted {capability} */
+            /** @description ip_not_allowed {ip}, account_closed, merchant_archived, merchant_blocked, merchant_restricted {capability} */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3432,7 +3432,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3614,7 +3614,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3774,7 +3774,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3947,7 +3947,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4213,7 +4213,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4365,7 +4365,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4517,7 +4517,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4668,7 +4668,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4924,7 +4924,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5061,7 +5061,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5154,7 +5154,7 @@ export interface operations {
                     network: string;
                     /** @description Asset of the payout: USDT or TRX */
                     asset: string;
-                    /** @description Recipient in the same network, in its format (checked by the adapter: 400 invalid_address) */
+                    /** @description Recipient in the same network, in its format (7.3): base58 T… or 0x… (an EIP-55 mixed case is accepted, stored lowercase); otherwise 400 invalid_address */
                     toAddress: string;
                     /** @description Received by the recipient; without it — the quote of the maximum */
                     amount?: string;
@@ -5261,7 +5261,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed {ip}, merchant_closed, merchant_blocked, merchant_restricted {capability} */
+            /** @description ip_not_allowed {ip}, account_closed, merchant_archived, merchant_blocked, merchant_restricted {capability} */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5546,7 +5546,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5636,7 +5636,7 @@ export interface operations {
                     asset: string;
                     /** @description Received by the recipient */
                     amount: string;
-                    /** @description Recipient in the same network, in its format (checked by the adapter: 400 invalid_address) */
+                    /** @description Recipient in the same network, in its format (7.3): base58 T… or 0x… (an EIP-55 mixed case is accepted, stored lowercase); otherwise 400 invalid_address */
                     toAddress: string;
                     /** @description Only for memo networks; not passed in TRON */
                     memo?: string;
@@ -5817,7 +5817,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed {ip}, merchant_closed, merchant_blocked, merchant_restricted {capability} */
+            /** @description ip_not_allowed {ip}, account_closed, merchant_archived, merchant_blocked, merchant_restricted {capability} */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5987,7 +5987,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6178,7 +6178,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6362,7 +6362,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6542,7 +6542,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6665,7 +6665,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6828,7 +6828,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6982,7 +6982,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7158,7 +7158,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed, merchant_blocked */
+            /** @description ip_not_allowed, account_closed, merchant_archived, merchant_blocked */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7379,7 +7379,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7580,7 +7580,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed */
+            /** @description ip_not_allowed, account_closed, merchant_archived */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7727,7 +7727,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description ip_not_allowed, merchant_closed, merchant_blocked */
+            /** @description ip_not_allowed, account_closed, merchant_archived, merchant_blocked */
             403: {
                 headers: {
                     [name: string]: unknown;

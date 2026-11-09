@@ -41,7 +41,10 @@ export interface PspErrorDetailsMap {
   api_auth_failed: ApiAuthFailedDetails;
   ip_not_allowed: { ip: string };
   merchant_blocked: null;
-  merchant_closed: null;
+  /** The merchant is archived by its owner in the cabinet: restore it there to use the API again. */
+  merchant_archived: null;
+  /** The user (owner) of the merchant is closed: no merchant of that user gets an answer. */
+  account_closed: null;
   merchant_restricted: { capability: 'invoices' | 'payouts' };
   not_found: { object: string; id: string | null };
   /** The `externalId` is taken by an invoice with other fields: read `invoiceId` or use a new `externalId`. */

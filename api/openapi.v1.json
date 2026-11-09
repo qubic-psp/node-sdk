@@ -103,7 +103,7 @@
               "active",
               "blocked"
             ],
-            "description": "Закрытый мерчант ответа не получает",
+            "description": "Мерчант в архиве (403 merchant_archived) и закрытый пользователь (403 account_closed) ответа не получают",
             "example": "active"
           },
           "invoicesEnabled": {
@@ -146,6 +146,7 @@
           "invalid_credentials",
           "unauthenticated",
           "api_auth_failed",
+          "pay_token_invalid",
           "setup_required",
           "reauth_required",
           "permission_denied",
@@ -153,7 +154,8 @@
           "account_blocked",
           "login_restricted",
           "merchant_blocked",
-          "merchant_closed",
+          "merchant_archived",
+          "account_closed",
           "merchant_restricted",
           "ip_not_allowed",
           "not_found",
@@ -4083,7 +4085,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived, merchant_closed",
             "content": {
               "application/json": {
                 "schema": {
@@ -4100,11 +4102,27 @@
                       }
                     }
                   },
+                  "account_closed": {
+                    "summary": "account_closed",
+                    "value": {
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
+                      "details": null
+                    }
+                  },
                   "merchant_closed": {
                     "summary": "merchant_closed",
                     "value": {
                       "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorMessage": "merchant closed",
                       "details": null
                     }
                   }
@@ -4502,7 +4520,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed {ip}, merchant_closed, merchant_blocked, merchant_restricted {capability}",
+            "description": "ip_not_allowed {ip}, account_closed, merchant_archived, merchant_blocked, merchant_restricted {capability}",
             "content": {
               "application/json": {
                 "schema": {
@@ -4519,11 +4537,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   },
@@ -4986,7 +5012,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -5003,11 +5029,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -5337,7 +5371,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -5354,11 +5388,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -5725,7 +5767,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -5742,11 +5784,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -6067,7 +6117,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -6084,11 +6134,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -6468,7 +6526,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -6485,11 +6543,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -7011,7 +7077,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -7028,11 +7094,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -7341,7 +7415,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -7358,11 +7432,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -7703,7 +7785,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -7720,11 +7802,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -8014,7 +8104,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -8031,11 +8121,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -8561,7 +8659,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -8578,11 +8676,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -8858,7 +8964,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -8875,11 +8981,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -9094,7 +9208,7 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 128,
-                    "description": "Recipient in the same network, in its format (checked by the adapter: 400 invalid_address)"
+                    "description": "Recipient in the same network, in its format (7.3): base58 T… or 0x… (an EIP-55 mixed case is accepted, stored lowercase); otherwise 400 invalid_address"
                   },
                   "amount": {
                     "type": "string",
@@ -9371,7 +9485,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed {ip}, merchant_closed, merchant_blocked, merchant_restricted {capability}",
+            "description": "ip_not_allowed {ip}, account_closed, merchant_archived, merchant_blocked, merchant_restricted {capability}",
             "content": {
               "application/json": {
                 "schema": {
@@ -9388,11 +9502,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   },
@@ -9667,7 +9789,7 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 128,
-                    "description": "Recipient in the same network, in its format (checked by the adapter: 400 invalid_address)"
+                    "description": "Recipient in the same network, in its format (7.3): base58 T… or 0x… (an EIP-55 mixed case is accepted, stored lowercase); otherwise 400 invalid_address"
                   },
                   "memo": {
                     "type": "string",
@@ -10022,7 +10144,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed {ip}, merchant_closed, merchant_blocked, merchant_restricted {capability}",
+            "description": "ip_not_allowed {ip}, account_closed, merchant_archived, merchant_blocked, merchant_restricted {capability}",
             "content": {
               "application/json": {
                 "schema": {
@@ -10039,11 +10161,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   },
@@ -10625,7 +10755,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -10642,11 +10772,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -10955,7 +11093,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -10972,11 +11110,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -11328,7 +11474,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -11345,11 +11491,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -11696,7 +11850,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -11713,11 +11867,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -12031,7 +12193,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -12048,11 +12210,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -12309,7 +12479,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -12326,11 +12496,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -12641,7 +12819,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -12658,11 +12836,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -12948,7 +13134,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -12965,11 +13151,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -13283,7 +13477,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed, merchant_blocked",
+            "description": "ip_not_allowed, account_closed, merchant_archived, merchant_blocked",
             "content": {
               "application/json": {
                 "schema": {
@@ -13300,11 +13494,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   },
@@ -13801,7 +14003,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -13818,11 +14020,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -14164,7 +14374,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed",
+            "description": "ip_not_allowed, account_closed, merchant_archived",
             "content": {
               "application/json": {
                 "schema": {
@@ -14181,11 +14391,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   }
@@ -14486,7 +14704,7 @@
             }
           },
           "403": {
-            "description": "ip_not_allowed, merchant_closed, merchant_blocked",
+            "description": "ip_not_allowed, account_closed, merchant_archived, merchant_blocked",
             "content": {
               "application/json": {
                 "schema": {
@@ -14503,11 +14721,19 @@
                       }
                     }
                   },
-                  "merchant_closed": {
-                    "summary": "merchant_closed",
+                  "account_closed": {
+                    "summary": "account_closed",
                     "value": {
-                      "errorCode": "merchant_closed",
-                      "errorMessage": "The merchant is closed",
+                      "errorCode": "account_closed",
+                      "errorMessage": "The user is closed",
+                      "details": null
+                    }
+                  },
+                  "merchant_archived": {
+                    "summary": "merchant_archived",
+                    "value": {
+                      "errorCode": "merchant_archived",
+                      "errorMessage": "The merchant is archived",
                       "details": null
                     }
                   },
