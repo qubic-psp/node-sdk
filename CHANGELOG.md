@@ -2,6 +2,20 @@
 
 All notable changes to `@qubiq-psp/sdk` are documented here. The project follows [Semantic Versioning](https://semver.org/).
 
+## 0.2.0 — Unreleased
+
+### Breaking
+
+- The error code `merchant_closed` is gone: the platform no longer closes single merchants. It is replaced by two `403` codes, both with `details: null`:
+  - `merchant_archived` — the owner archived the merchant in the cabinet (it can restore it there);
+  - `account_closed` — the user who owns the merchant is closed.
+
+Migration: wherever you match `merchant_closed` (`isPspApiError(err, 'merchant_closed')`, a `switch` on `err.errorCode`), match `merchant_archived` and `account_closed` instead — `isPspApiError(err, 'merchant_closed')` no longer compiles, but a comparison of `err.errorCode` with the string does, so search the code for it. Both mean that the API key gets no answer until the merchant is restored (`merchant_archived`) or never again (`account_closed`): stop creating invoices with that key and alert a person; do not retry.
+
+### Changed
+
+- `api/openapi.v1.json` and `src/generated/schema.d.ts` are synced with the current public OpenAPI of the platform.
+
 ## 0.1.1 — 2026-10-29
 
 No code changes: the first release through npm trusted publishing (OIDC) — GitHub Actions stages the version without a stored token, a maintainer approves it with 2FA.

@@ -591,7 +591,8 @@ if (isPspApiError(err, 'too_many_requests')) err.details.retryAfterSeconds; // n
 | 400  | `invalid_url`                                      | `{ field: 'url', reason }`                        | Fix the webhook URL                                    |
 | 401  | `api_auth_failed`                                  | `{ reason, header?, serverTime?, stringToSign? }` | See [below](#signature-errors); do not retry in a loop |
 | 403  | `ip_not_allowed`                                   | `{ ip }`                                          | Add the IP to the allowlist in the cabinet             |
-| 403  | `merchant_blocked`, `merchant_closed`              | `null`                                            | Contact support                                        |
+| 403  | `merchant_blocked`, `account_closed`               | `null`                                            | Contact support                                        |
+| 403  | `merchant_archived`                                | `null`                                            | The owner restores the merchant in the cabinet         |
 | 403  | `merchant_restricted`                              | `{ capability }`                                  | The right is off: contact support                      |
 | 404  | `not_found`                                        | `{ object, id }`                                  | Wrong id, or an object of another merchant             |
 | 409  | `invoice_conflict`                                 | `{ invoiceId }`                                   | Read that invoice, or use a new `externalId`           |
