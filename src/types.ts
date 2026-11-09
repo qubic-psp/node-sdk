@@ -37,7 +37,10 @@ export interface AccountApiKey {
 export interface Account {
   merchantId: Uuid;
   name: string;
-  /** A closed merchant gets no answer at all (`403 merchant_closed`). */
+  /**
+   * An archived merchant (`403 merchant_archived`) and a merchant of a closed user (`403 account_closed`) get no
+   * answer at all.
+   */
   status: 'active' | 'blocked';
   /** The merchant may create invoices. */
   invoicesEnabled: boolean;
