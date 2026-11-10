@@ -2,6 +2,10 @@
 
 All notable changes to `@qubiq-psp/sdk` are documented here. The project follows [Semantic Versioning](https://semver.org/).
 
+## 0.2.1 — 2026-11-10
+
+No code changes: the GitHub organization was renamed from `qubic-psp` to `qubiq-psp`. `repository`, `homepage` and `bugs` in `package.json` point to `github.com/qubiq-psp`, so npm provenance matches the repository the package is built from. This release also validates the npm trusted publisher of the renamed organization.
+
 ## 0.2.0 — 2026-11-10
 
 ### Breaking
