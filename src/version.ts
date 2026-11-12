@@ -1,2 +1,2 @@
 /** Version of @qubiq-psp/sdk; equals the version of package.json (checked by src/index.test.ts). */
-export const VERSION = '0.2.0';
+export const VERSION = '0.2.1';
